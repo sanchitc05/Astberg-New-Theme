@@ -1,0 +1,140 @@
+<!-- sections/video-scroll.liquid -->
+<div id="scroll-video-{{ section.id }}" class="custom-video-scroll-trigger-area" style="height: 200vh;">
+    <div class="custom-video-sticky-wrapper">
+        <div class="custom-video-container">
+            <video class="custom-bg-video" muted playsinline preload="none" poster="{{ section.settings.poster_image | img_url: 'master' }}">
+                <source data-src="{{ section.settings.video_url }}" type="video/mp4">
+            </video>
+        </div>
+        <div class="custom-video-content-overlay">
+            <h1>{{ section.settings.heading }}</h1>
+            <p>{{ section.settings.description }}</p>
+            {% if section.settings.button_url != blank %}
+                <a href="{{ section.settings.button_url }}" class="cta-button">{{ section.settings.button_text }}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    #scroll-video-{{ section.id }} { position: relative; }
+    #scroll-video-{{ section.id }} .custom-video-sticky-wrapper {
+        position: sticky; top: 0; height: 100vh; width: 100%;
+        display: flex; overflow: hidden; color: white;
+        padding: 2.5rem; box-sizing: border-box;
+        align-items: flex-end; justify-content: center; text-align: center;
+    }
+    #scroll-video-{{ section.id }} .custom-video-container { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background-color: #000; z-index: 1; 
+    }
+    #scroll-video-{{ section.id }} .custom-bg-video { 
+        width: 100%; height: 100%; object-fit: cover; 
+    }
+    #scroll-video-{{ section.id }} .custom-video-content-overlay { 
+        position: relative; z-index: 2; transition: opacity 0.4s ease-out; max-width: 800px; 
+    }
+    #scroll-video-{{ section.id }} .custom-video-content-overlay h1 { 
+        font-size: clamp(2em, 5vw, 3.5em); margin: 0 0 10px; 
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+    }
+    #scroll-video-{{ section.id }} .custom-video-content-overlay p { 
+        font-size: clamp(1em, 2vw, 1.2em); margin: 0 0 20px; 
+        text-shadow: 0 2px 5px rgba(0,0,0,0.5); 
+    }
+    #scroll-video-{{ section.id }} .custom-video-content-overlay .cta-button { 
+        display: inline-block; background-color: #007aff; color: white; 
+        padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; 
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const section = document.getElementById('scroll-video-{{ section.id }}');
+    if (!section) return;
+    const video = section.querySelector('video');
+    const contentOverlay = section.querySelector('.custom-video-content-overlay');
+    if (!video) return;
+
+    const scrubFactor = 1; const startTime = 0; let endTime = 0;
+    const endBehavior = 'freeze';
+    
+    const scrollHandler = () => {
+        if (video.readyState < 2) return;
+        if (endTime === 0) endTime = video.duration;
+        const playableDuration = endTime - startTime;
+        if (playableDuration <= 0) return;
+        const rect = section.getBoundingClientRect();
+        const scrollDistance = window.innerHeight * scrubFactor;
+        const scrollPast = Math.max(0, -rect.top);
+        let progress = 0; let isPast = rect.bottom <= window.innerHeight;
+        if (rect.top <= 0 && !isPast) { progress = Math.min(1, scrollPast / scrollDistance); } else if (isPast) { progress = 1; }
+        const newTime = startTime + (progress * playableDuration);
+        if (Math.abs(video.currentTime - newTime) > 0.01) video.currentTime = newTime;
+        if (contentOverlay) contentOverlay.style.opacity = Math.max(0, 1 - (progress * 2.5));
+        if (isPast && endBehavior === 'reset') video.currentTime = startTime;
+    };
+
+    video.addEventListener('loadedmetadata', () => {
+        if (video.currentTime < startTime) video.currentTime = startTime;
+        scrollHandler();
+    });
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            const source = video.querySelector('source');
+            if (video.src !== source.dataset.src) { video.src = source.dataset.src; video.load(); }
+            observer.disconnect();
+        }
+    }, { threshold: 0.1 });
+    observer.observe(section);
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    window.addEventListener('resize', scrollHandler);
+});
+</script>
+
+{% schema %}
+{
+  "name": "Scroll Video",
+  "settings": [
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "image_picker",
+      "id": "poster_image",
+      "label": "Poster Image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Simplified & Stable"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Description",
+      "default": "This is version 5.0. It just works."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scroll Video",
+      "category": "Video"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,375 @@
+{%- assign sect_id = 'tb-' | append: section.id -%}
+
+<style>
+  #{{ sect_id }} {
+    background-color: {{ section.settings.bg_color }};
+    padding: {{ section.settings.section_padding }}px 0;
+  }
+
+  #{{ sect_id }} .tb-inner {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────── */
+  #{{ sect_id }} .tb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  #{{ sect_id }} .tb-heading {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: {{ section.settings.heading_weight }};
+    line-height: 1.15;
+    color: {{ section.settings.heading_color }};
+    margin: 0;
+    max-width: 38%;
+    font-family: {{ section.settings.heading_font }};
+  }
+
+  #{{ sect_id }} .tb-description {
+    font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+    line-height: 1.7;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    max-width: 35%;
+    text-align: right;
+    align-self: flex-start;
+  }
+
+  /* ── Grid ────────────────────────────────────────────────────── */
+  #{{ sect_id }} .tb-grid {
+    display: grid;
+    grid-template-columns: repeat({{ section.settings.columns }}, 1fr);
+    gap: {{ section.settings.grid_gap }}px;
+  }
+
+  /* ── Card ────────────────────────────────────────────────────── */
+  #{{ sect_id }} .tb-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #{{ sect_id }} .tb-card-img-wrap {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 0.85rem;
+  }
+
+  #{{ sect_id }} .tb-card-img {
+    width: 100%;
+    aspect-ratio: {{ section.settings.image_ratio }};
+    object-fit: cover;
+    display: block;
+    filter: {{ section.settings.image_filter }};
+    transition: filter 0.4s ease;
+  }
+
+  {%- if section.settings.hover_color -%}
+  #{{ sect_id }} .tb-card:hover .tb-card-img {
+    filter: none;
+  }
+  {%- endif -%}
+
+  #{{ sect_id }} .tb-card-name {
+    font-size: clamp(0.8rem, 1.1vw, 1rem);
+    font-weight: 500;
+    color: {{ section.settings.heading_color }};
+    margin: 0 0 0.2rem;
+    line-height: 1.3;
+  }
+
+  #{{ sect_id }} .tb-card-role {
+    font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    line-height: 1.3;
+    font-weight: {{ section.settings.role_weight }};
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    #{{ sect_id }} .tb-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    #{{ sect_id }} .tb-heading {
+      max-width: 50%;
+    }
+    #{{ sect_id }} .tb-description {
+      max-width: 45%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #{{ sect_id }} .tb-inner {
+      padding: 0 var(--page-margin, 16px);
+    }
+    #{{ sect_id }} .tb-header {
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    #{{ sect_id }} .tb-heading {
+      max-width: 100%;
+      font-size: clamp(1.75rem, 6vw, 2.5rem);
+    }
+    #{{ sect_id }} .tb-description {
+      max-width: 100%;
+      text-align: left;
+    }
+    #{{ sect_id }} .tb-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #{{ sect_id }} .tb-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+</style>
+
+<div id="{{ sect_id }}">
+  <div class="tb-inner">
+
+    <!-- Header -->
+    <div class="tb-header">
+      <h2 class="tb-heading">{{ section.settings.heading }}</h2>
+      {%- if section.settings.description != blank -%}
+        <p class="tb-description">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </div>
+
+    <!-- Grid -->
+    {%- if section.blocks.size > 0 -%}
+      <div class="tb-grid">
+        {%- for block in section.blocks -%}
+          <div class="tb-card" {{ block.shopify_attributes }}>
+            <div class="tb-card-img-wrap">
+              {%- if block.settings.image != blank -%}
+                <img
+                  class="tb-card-img"
+                  src="{{ block.settings.image | img_url: '600x' }}"
+                  alt="{{ block.settings.name | escape }}"
+                  width="600"
+                  height="800"
+                  loading="lazy"
+                />
+              {%- else -%}
+                <div class="tb-card-img" style="background:#e5e5e5;"></div>
+              {%- endif -%}
+            </div>
+            {%- if block.settings.name != blank -%}
+              <p class="tb-card-name">{{ block.settings.name | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.role != blank -%}
+              <p class="tb-card-role">{{ block.settings.role | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Trusted By",
+  "tag": "section",
+  "class": "trusted-by-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Trusted by Those Who Inspire"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Discover how renowned personalities have integrated our products into their spaces, bringing unparalleled ambiance to their homes and workplaces."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns (desktop)",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Grid gap (px)",
+      "min": 8,
+      "max": 64,
+      "step": 4,
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding (px)",
+      "min": 20,
+      "max": 160,
+      "step": 10,
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max content width (px)",
+      "min": 800,
+      "max": 1600,
+      "step": 40,
+      "default": 1400
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "3/4",  "label": "Portrait 3:4 (default)" },
+        { "value": "1/1",  "label": "Square 1:1" },
+        { "value": "4/5",  "label": "Portrait 4:5" },
+        { "value": "4/3",  "label": "Landscape 4:3" }
+      ],
+      "default": "3/4"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_filter",
+      "label": "Image filter",
+      "options": [
+        { "value": "grayscale(100%)", "label": "Black & white (default)" },
+        { "value": "grayscale(50%)",  "label": "Partial B&W" },
+        { "value": "none",            "label": "Full colour" }
+      ],
+      "default": "grayscale(100%)"
+    },
+    {
+      "type": "checkbox",
+      "id": "hover_color",
+      "label": "Show colour on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "heading_font",
+      "label": "Heading font family",
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "role_weight",
+      "label": "Role text weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading & name colour",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Body & role colour",
+      "default": "#555555"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "person",
+      "name": "Person",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Mr. Full Name"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Title / Company",
+          "default": "Title"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trusted By",
+      "blocks": [
+        { "type": "person", "settings": { "name": "Mr. Mukesh Ambani",    "role": "Reliance Industry" } },
+        { "type": "person", "settings": { "name": "Mrs. Shilpa Shetty",   "role": "Actress" } },
+        { "type": "person", "settings": { "name": "Mr. Peyush Bansal",    "role": "Founder of Lenskart" } },
+        { "type": "person", "settings": { "name": "Mr. Deepinder Goyal",  "role": "CEO Zomato" } },
+        { "type": "person", "settings": { "name": "Mr. Nitin Gadkari",    "role": "Politician" } },
+        { "type": "person", "settings": { "name": "Mr. Raj Kumar Hirani", "role": "Bollywood Movie Director" } },
+        { "type": "person", "settings": { "name": "Mrs. Sarah Sham",      "role": "Interior Designer" } },
+        { "type": "person", "settings": { "name": "Mr. Rizwan Sajan",     "role": "Founder of Danube Properties" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

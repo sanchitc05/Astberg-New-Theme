@@ -1,0 +1,295 @@
+{{ 'globe-hero.css' | asset_url | stylesheet_tag }}
+
+<div 
+  class="globe-hero"
+  style="
+    --globe-bg: {{ section.settings.background_color }};
+    --globe-text-from: {{ section.settings.text_gradient_from }};
+    --globe-text-to: {{ section.settings.text_gradient_to }};
+    --globe-marker-color: {{ section.settings.marker_color }};
+    --globe-glow-color: {{ section.settings.glow_color }};
+    --globe-base-color: {{ section.settings.globe_base_color }};
+    --globe-glare-color: {{ section.settings.globe_glare_color }};
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="globe-hero__container">
+    <span class="globe-hero__title">
+      {{ section.settings.heading }}
+    </span>
+    
+    {% if section.settings.subheading != blank %}
+      <p class="globe-hero__subtitle">{{ section.settings.subheading }}</p>
+    {% endif %}
+    
+    <canvas 
+      id="globe-canvas-{{ section.id }}" 
+      class="globe-hero__canvas"
+      width="{{ section.settings.globe_size }}"
+      height="{{ section.settings.globe_size }}"
+      data-section-id="{{ section.id }}"
+      data-globe-size="{{ section.settings.globe_size }}"
+      data-rotation-speed="{{ section.settings.rotation_speed }}"
+      data-marker-color="{{ section.settings.marker_color }}"
+      data-globe-base="{{ section.settings.globe_base_color }}"
+      data-globe-glare="{{ section.settings.globe_glare_color }}"
+      data-glow-color="{{ section.settings.glow_color }}"
+      data-dark-mode="{{ section.settings.dark_mode }}"
+    ></canvas>
+    
+    <div class="globe-hero__gradient-overlay"></div>
+  </div>
+  
+  {% if section.settings.show_cta %}
+    <div class="globe-hero__cta">
+      <a href="{{ section.settings.cta_link }}" class="globe-hero__button">
+        {{ section.settings.cta_text }}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<script src="https://unpkg.com/cobe@0.6.3/dist/cobe.min.js"></script>
+<script>
+  (function() {
+    const canvas = document.getElementById('globe-canvas-{{ section.id }}');
+    if (!canvas) return;
+    
+    const size = parseInt(canvas.dataset.globeSize) || 600;
+    const rotationSpeed = parseFloat(canvas.dataset.rotationSpeed) || 0.005;
+    const isDarkMode = canvas.dataset.darkMode === 'true';
+    
+    // Parse colors
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [
+        parseInt(result[1], 16) / 255,
+        parseInt(result[2], 16) / 255,
+        parseInt(result[3], 16) / 255
+      ] : [0.3, 0.6, 1];
+    }
+    
+    const markerColor = hexToRgb(canvas.dataset.markerColor || '#6366f1');
+    const baseColor = hexToRgb(canvas.dataset.globeBase || '#1d4ed8');
+    const glowColor = hexToRgb(canvas.dataset.glowColor || '#3b82f6');
+    const glareColor = hexToRgb(canvas.dataset.globeGlare || '#ffffff');
+    
+    let phi = 0;
+    let globe;
+    
+    function createGlobe() {
+      globe = createCobe(canvas, {
+        devicePixelRatio: 2,
+        width: size * 2,
+        height: size * 2,
+        phi: 0,
+        theta: 0.3,
+        dark: isDarkMode ? 1 : 0,
+        diffuse: 1.2,
+        mapSamples: 16000,
+        mapBrightness: 6,
+        baseColor: baseColor,
+        markerColor: markerColor,
+        glowColor: glowColor,
+        markers: [
+          { location: [37.7749, -122.4194], size: 0.1 }, // San Francisco
+          { location: [40.7128, -74.0060], size: 0.08 }, // New York
+          { location: [51.5074, -0.1278], size: 0.08 }, // London
+          { location: [35.6762, 139.6503], size: 0.08 }, // Tokyo
+          { location: [48.8566, 2.3522], size: 0.06 }, // Paris
+          { location: [-33.8688, 151.2093], size: 0.06 }, // Sydney
+          { location: [1.3521, 103.8198], size: 0.06 }, // Singapore
+          { location: [55.7558, 37.6173], size: 0.06 }, // Moscow
+          { location: [19.0760, 72.8777], size: 0.06 }, // Mumbai
+          { location: [-23.5505, -46.6333], size: 0.06 }, // São Paulo
+        ],
+        onRender: (state) => {
+          state.phi = phi;
+          phi += rotationSpeed;
+        }
+      });
+    }
+    
+    // Initialize globe when cobe is loaded
+    if (typeof createCobe !== 'undefined') {
+      createGlobe();
+    } else {
+      // Wait for cobe to load
+      const checkCobe = setInterval(() => {
+        if (typeof createCobe !== 'undefined') {
+          clearInterval(checkCobe);
+          createGlobe();
+        }
+      }, 100);
+    }
+    
+    // Cleanup on section unload (for Shopify theme editor)
+    document.addEventListener('shopify:section:unload', function(event) {
+      if (event.detail.sectionId === '{{ section.id }}' && globe) {
+        globe.destroy();
+      }
+    });
+    
+    // Reinitialize on section load (for Shopify theme editor)
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.detail.sectionId === '{{ section.id }}') {
+        if (globe) globe.destroy();
+        setTimeout(createGlobe, 100);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Globe Hero",
+  "tag": "section",
+  "class": "globe-hero-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Globe"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Welcome"
+    },
+    {
+      "type": "header",
+      "content": "Call to Action"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cta",
+      "label": "Show CTA button",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Globe Settings"
+    },
+    {
+      "type": "range",
+      "id": "globe_size",
+      "label": "Globe size",
+      "min": 300,
+      "max": 900,
+      "step": 50,
+      "default": 600,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "rotation_speed",
+      "label": "Rotation speed",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5,
+      "info": "Higher = faster rotation"
+    },
+    {
+      "type": "checkbox",
+      "id": "dark_mode",
+      "label": "Dark mode globe",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_gradient_from",
+      "label": "Text gradient start",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_gradient_to",
+      "label": "Text gradient end",
+      "default": "#4b5563"
+    },
+    {
+      "type": "color",
+      "id": "globe_base_color",
+      "label": "Globe base color",
+      "default": "#1d4ed8"
+    },
+    {
+      "type": "color",
+      "id": "globe_glare_color",
+      "label": "Globe glare color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "marker_color",
+      "label": "Location marker color",
+      "default": "#6366f1"
+    },
+    {
+      "type": "color",
+      "id": "glow_color",
+      "label": "Globe glow color",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "default": 100,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Globe Hero",
+      "category": "Hero"
+    }
+  ]
+}
+{% endschema %}

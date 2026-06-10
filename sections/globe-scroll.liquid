@@ -1,0 +1,458 @@
+{%- assign sid = 'cs-' | append: section.id -%}
+
+<style>
+  #shopify-section-{{ section.id }} { padding: 0 !important; }
+
+  /* ── Header (climate-section equivalent) ── */
+  #{{ sid }} .cs-header {
+    position: relative;
+    z-index: 2;
+    background: {{ section.settings.background_color }};
+    padding: clamp(60px, 8vw, 120px) clamp(1.5rem, 5vw, 5rem) clamp(40px, 5vw, 80px);
+  }
+
+  #{{ sid }} .cs-header__inner {
+    max-width: min(1300px, 75%);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  #{{ sid }} .cs-header__text {
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 700;
+    line-height: 1.35;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    font-family: var(--font-primary);
+  }
+
+  /* ── Two-panel section ── */
+  #{{ sid }} .cs-panels {
+    position: relative;
+    width: 100%;
+    height: 200vh; /* native scroll space — no GSAP pin needed */
+  }
+
+  #{{ sid }} .cs-panels-inner {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: {{ section.settings.background_color }};
+  }
+
+  #{{ sid }} .cs-container {
+    position: relative;
+    height: 60vh;
+    width: 100%;
+  }
+
+  /* Both panels: absolute, stacked on same space */
+  #{{ sid }} .cs-panel {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: {{ section.settings.background_color }};
+    padding: 0 11px;
+    overflow: hidden;
+  }
+
+  #{{ sid }} .cs-panel__row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  #{{ sid }} .cs-panel__media,
+  #{{ sid }} .cs-panel__text-col {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  #{{ sid }} .cs-panel__text-col {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #{{ sid }} .cs-video {
+    width: 70%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Panel 2 stacks directly over Panel 1; GSAP clips it from the top on scroll */
+  #{{ sid }} .cs-panel--second {
+    z-index: 2;
+  }
+
+  /* ── Wave divider (between header and panels) ── */
+  #{{ sid }} .cs-wave {
+    position: relative;
+    line-height: 0;
+    /* background = wave_color; SVG cuts a white wave out of it */
+    background: {{ section.settings.wave_color }};
+    overflow: hidden;
+    margin-bottom: -2px;
+  }
+  #{{ sid }} .cs-wave svg {
+    display: block;
+    width: 100%;
+    height: clamp(50px, 7vw, 90px);
+  }
+
+  /* ── Text styles ── */
+  #{{ sid }} .cs-pm {
+    font-size: clamp(1.2rem, 2.5vw, 2.25rem);
+    line-height: 1.4;
+    font-weight: 400;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+  }
+
+  #{{ sid }} .cs-pm span {
+    font-weight: 700;
+  }
+
+  #{{ sid }} .cs-stat {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 0.3rem;
+  }
+
+  #{{ sid }} .cs-stat span {
+    display: block;
+    font-size: clamp(1.2rem, 2.5vw, 2rem);
+    font-weight: 500;
+  }
+
+  #{{ sid }} .cs-body {
+    font-size: clamp(0.9rem, 1.4vw, 1.25rem);
+    line-height: 1.55;
+    color: {{ section.settings.text_color }};
+    margin: 0.5rem 0 0;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 767px) {
+    #{{ sid }} .cs-header__inner { max-width: 90%; }
+    #{{ sid }} .cs-header__text { font-size: 1.5rem; }
+
+    #{{ sid }} .cs-panels { height: 250vh; }
+    #{{ sid }} .cs-panels-inner { height: 100vh; }
+
+    #{{ sid }} .cs-container,
+    #{{ sid }} .cs-panel { height: 80vh; }
+
+    #{{ sid }} .cs-panel__row {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    #{{ sid }} .cs-panel__media,
+    #{{ sid }} .cs-panel__text-col {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+
+    #{{ sid }} .cs-video { width: 85%; height: auto; }
+
+    #{{ sid }} .cs-pm   { font-size: 1.25rem; }
+    #{{ sid }} .cs-stat  { font-size: 1.875rem; }
+    #{{ sid }} .cs-stat span { font-size: 1.25rem; }
+    #{{ sid }} .cs-body  { font-size: 1rem; }
+  }
+</style>
+
+<div id="{{ sid }}" style="grid-column: 1 / -1;">
+
+  <!-- Header: "Praan is democratizing..." equivalent -->
+  {%- if section.settings.headline != blank -%}
+    <div class="cs-header">
+      <div class="cs-header__inner">
+        <p class="cs-header__text">{{ section.settings.headline | escape }}</p>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- Wave divider -->
+  {%- if section.settings.wave_color != blank -%}
+    <div class="cs-wave" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+        <path d="M0,32 C180,64 360,0 540,36 C720,72 900,8 1080,40 C1260,68 1380,20 1440,40 L1440,80 L0,80 Z"
+              fill="{{ section.settings.background_color }}"/>
+      </svg>
+    </div>
+  {%- endif -%}
+
+  <!-- Two-panel pinned section -->
+  <div class="cs-panels">
+    <div class="cs-panels-inner">
+      <div class="cs-container">
+
+        <!-- Panel 1 (always visible) -->
+        <div class="cs-panel cs-panel--first">
+          <div class="cs-panel__row">
+
+            <div class="cs-panel__media">
+              {%- if section.settings.panel1_video_url != blank -%}
+                <video class="cs-video"
+                  src="{{ section.settings.panel1_video_url }}"
+                  autoplay muted playsinline loop
+                  {%- if section.settings.panel1_poster_url != blank %} poster="{{ section.settings.panel1_poster_url }}"{% endif %}></video>
+              {%- else -%}
+                <div style="width:70%;aspect-ratio:16/9;background:#e8e8e8;border-radius:8px;"></div>
+              {%- endif -%}
+            </div>
+
+            <div class="cs-panel__text-col">
+              {%- if section.settings.panel1_text != blank -%}
+                <p class="cs-pm">{{ section.settings.panel1_text }}</p>
+              {%- endif -%}
+              {%- if section.settings.panel1_stat != blank -%}
+                <p class="cs-stat" style="opacity:0;">
+                  {{ section.settings.panel1_stat | escape }}
+                  {%- if section.settings.panel1_stat_sub != blank -%}
+                    <span>{{ section.settings.panel1_stat_sub | escape }}</span>
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Panel 2 (revealed by clip-path wipe on scroll) -->
+        <div class="cs-panel cs-panel--second">
+          <div class="cs-panel__row">
+
+            <div class="cs-panel__media">
+              {%- if section.settings.panel2_video_url != blank -%}
+                <video class="cs-video"
+                  src="{{ section.settings.panel2_video_url }}"
+                  autoplay muted playsinline loop
+                  {%- if section.settings.panel2_poster_url != blank %} poster="{{ section.settings.panel2_poster_url }}"{% endif %}></video>
+              {%- else -%}
+                <div style="width:70%;aspect-ratio:16/9;background:#d8d8d8;border-radius:8px;"></div>
+              {%- endif -%}
+            </div>
+
+            <div class="cs-panel__text-col">
+              {%- if section.settings.panel2_stat != blank -%}
+                <p class="cs-stat">
+                  {{ section.settings.panel2_stat | escape }}
+                  {%- if section.settings.panel2_stat_sub != blank -%}
+                    <span>{{ section.settings.panel2_stat_sub | escape }}</span>
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+              {%- if section.settings.panel2_text != blank -%}
+                <p class="cs-body">{{ section.settings.panel2_text }}</p>
+              {%- endif -%}
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var SID = '{{ sid }}';
+
+  function loadScript(src, cb) {
+    if (document.querySelector('script[data-gsap-lib="' + src + '"]')) { cb(); return; }
+    var el = document.createElement('script');
+    el.src = src; el.dataset.gsapLib = src; el.onload = cb;
+    document.head.appendChild(el);
+  }
+
+  function init() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+      console.warn('[globe-scroll] GSAP or ScrollTrigger not loaded — upload gsap.min.js and ScrollTrigger.min.js to theme assets.');
+      return;
+    }
+    var wrap = document.getElementById(SID);
+    if (!wrap || wrap.dataset.csReady) return;
+    wrap.dataset.csReady = '1';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* Trigger is the 200vh tall container; sticky inner handles the pin natively */
+    var panels = wrap.querySelector('.cs-panels');
+    var second = wrap.querySelector('.cs-panel--second');
+
+    if (!panels || !second) return;
+
+    gsap.set(second, { clipPath: 'inset(100% 0% 0% 0%)' });
+
+    gsap.to(second, {
+      clipPath: 'inset(0% 0% 0% 0%)',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: panels,
+        start: 'top top',
+        end: () => '+=' + window.innerHeight,
+        scrub: 1,
+        invalidateOnRefresh: true
+      }
+    });
+  }
+
+  function bootstrap() {
+    if (window.gsap && window.ScrollTrigger) { init(); return; }
+    var GSAP = {{ 'gsap.min.js' | asset_url | json }};
+    var ST   = {{ 'ScrollTrigger.min.js' | asset_url | json }};
+    loadScript(GSAP, function () { loadScript(ST, init); });
+  }
+
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', bootstrap)
+    : bootstrap();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Climate Scroll",
+  "tag": "div",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "textarea",
+      "id": "headline",
+      "label": "Headline text",
+      "default": "We are democratizing access to clean, healthy air"
+    },
+    {
+      "type": "header",
+      "content": "Panel 1"
+    },
+    {
+      "type": "text",
+      "id": "panel1_video_url",
+      "label": "Panel 1 video URL (.mp4)",
+      "info": "Upload to Shopify Files and paste the CDN URL here."
+    },
+    {
+      "type": "text",
+      "id": "panel1_poster_url",
+      "label": "Panel 1 poster image URL",
+      "info": "Optional: shown before the video loads."
+    },
+    {
+      "type": "richtext",
+      "id": "panel1_text",
+      "label": "Panel 1 main text",
+      "default": "<p>Particulate matter in <span> urban air has 45x–150x</span> the global warming impact of CO2</p>",
+      "info": "Use <span> tags around bold words, or use bold in the rich text editor."
+    },
+    {
+      "type": "text",
+      "id": "panel1_stat",
+      "label": "Panel 1 stat (hidden until panel 2 wipes in)",
+      "default": "7.2 Billion"
+    },
+    {
+      "type": "text",
+      "id": "panel1_stat_sub",
+      "label": "Panel 1 stat sub-line",
+      "default": "People breathe toxic air everyday"
+    },
+    {
+      "type": "header",
+      "content": "Panel 2"
+    },
+    {
+      "type": "text",
+      "id": "panel2_video_url",
+      "label": "Panel 2 video URL (.mp4)",
+      "info": "Upload to Shopify Files and paste the CDN URL here."
+    },
+    {
+      "type": "text",
+      "id": "panel2_poster_url",
+      "label": "Panel 2 poster image URL"
+    },
+    {
+      "type": "text",
+      "id": "panel2_stat",
+      "label": "Panel 2 stat",
+      "default": "7.2 Billion"
+    },
+    {
+      "type": "text",
+      "id": "panel2_stat_sub",
+      "label": "Panel 2 stat sub-line",
+      "default": "People breathe toxic air everyday"
+    },
+    {
+      "type": "textarea",
+      "id": "panel2_text",
+      "label": "Panel 2 body text",
+      "default": "According to the WHO, 9/10 people in the world breathe polluted air every day, killing over 7M people annually."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "wave_color",
+      "label": "Wave divider color",
+      "info": "Set a color different from the background to show the wave. Leave matching background to hide it.",
+      "default": "#f2f2f2"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Climate Scroll",
+      "settings": {
+        "headline": "We are democratizing access to clean, healthy air",
+        "panel1_stat": "7.2 Billion",
+        "panel1_stat_sub": "People breathe toxic air everyday",
+        "panel2_stat": "7.2 Billion",
+        "panel2_stat_sub": "People breathe toxic air everyday",
+        "panel2_text": "According to the WHO, 9/10 people in the world breathe polluted air every day, killing over 7M people annually.",
+        "background_color": "#ffffff",
+        "text_color": "#1a1a1a",
+        "wave_color": "#f2f2f2"
+      }
+    }
+  ]
+}
+{% endschema %}

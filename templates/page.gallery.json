@@ -1,0 +1,145 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "name": "Title",
+          "settings": {
+            "text": "<h1>{{ closest.page.title }}</h1>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "heading"
+      ],
+      "disabled": true,
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 80
+      }
+    },
+    "depth_gallery_L9KCiR": {
+      "type": "depth-gallery",
+      "blocks": {
+        "item_GgUi7V": {
+          "type": "item",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_May_29_2026_03_05_36_PM.png",
+            "label_word": "DARWIN SERIES",
+            "label_pms": "PMS 135 C",
+            "label_color": "#2e2e2e",
+            "accent_color": "#34f115",
+            "bg_color": "#fffaf0",
+            "blob1_color": "#b6ff94",
+            "blob2_color": "#fff3df",
+            "x_position": -0.9
+          }
+        },
+        "item_zp8TrY": {
+          "type": "item",
+          "settings": {
+            "image": "shopify://shop_images/violet.png",
+            "label_word": "DARWIN FOR Exceptional Power",
+            "label_pms": "PMS 4985 C",
+            "label_color": "#2e2e2e",
+            "accent_color": "#80455a",
+            "bg_color": "#fffaf0",
+            "blob1_color": "#d29a41",
+            "blob2_color": "#bb96af",
+            "x_position": 0.8
+          }
+        },
+        "item_DRqcfD": {
+          "type": "item",
+          "settings": {
+            "image": "shopify://shop_images/afterglow.png",
+            "label_word": "DARWIN FOR CHANGE",
+            "label_pms": "PMS 170 C",
+            "label_color": "#f4f4f4",
+            "accent_color": "#fa7b71",
+            "bg_color": "#5f81ab",
+            "blob1_color": "#f88b8d",
+            "blob2_color": "#cfbbdd",
+            "x_position": -0.7
+          }
+        },
+        "item_QKPnDG": {
+          "type": "item",
+          "settings": {
+            "image": "shopify://shop_images/blue.png",
+            "label_word": "DARWIN FOR BEYOND VENTILATION",
+            "label_pms": "PMS 660 C",
+            "label_color": "#f4f4f4",
+            "accent_color": "#3c72c6",
+            "bg_color": "#5b9bc2",
+            "blob1_color": "#ffaa00",
+            "blob2_color": "#00e1ff",
+            "x_position": 1
+          }
+        },
+        "item_HkzFer": {
+          "type": "item",
+          "settings": {
+            "label_word": "meadow",
+            "label_pms": "PMS 7507 C",
+            "label_color": "#f4f4f4",
+            "accent_color": "#fdd895",
+            "bg_color": "#7d936e",
+            "blob1_color": "#fdd895",
+            "blob2_color": "#a5b599",
+            "x_position": -0.7
+          }
+        }
+      },
+      "block_order": [
+        "item_GgUi7V",
+        "item_zp8TrY",
+        "item_DRqcfD",
+        "item_QKPnDG",
+        "item_HkzFer"
+      ],
+      "name": "Depth Gallery",
+      "settings": {
+        "scroll_height": 600,
+        "plane_gap": 5
+      }
+    }
+  },
+  "order": [
+    "main",
+    "depth_gallery_L9KCiR"
+  ]
+}

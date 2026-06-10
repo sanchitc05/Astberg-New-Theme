@@ -1,0 +1,128 @@
+
+
+{% liquid
+  assign block_settings = block.settings
+  assign logo_image = block_settings.image
+  assign logo_opacity = block_settings.opacity | divided_by: 100.0
+%}
+
+{% capture logo_tag %}
+  {%- if logo_image -%}
+    {{-
+      logo_image
+      | image_url: width: 800
+      | image_tag:
+        class: 'brand-logo__image',
+        widths: '120, 200, 320, 480, 640, 800',
+        alt: logo_image.alt | default: '',
+        loading: 'lazy'
+    -}}
+  {%- else -%}
+    <div class="brand-logo__placeholder">
+      {{- 'logo' | placeholder_svg_tag: 'brand-logo__placeholder-svg' -}}
+    </div>
+  {%- endif -%}
+{% endcapture %}
+
+{% capture shared_attrs %}
+  class="brand-logo{% if block_settings.grayscale %} brand-logo--grayscale{% endif %}"
+  style="--brand-logo-opacity: {{ logo_opacity }}; --logo-height: var(--logo-marquee-height, 48px);"
+  {{ block.shopify_attributes }}
+{% endcapture %}
+
+{%- if block_settings.link != blank -%}
+  <a
+    href="{{ block_settings.link }}"
+    {{ shared_attrs }}
+    aria-label="{{ logo_image.alt | default: 'Partner logo' | escape }}"
+  >
+    {{ logo_tag }}
+  </a>
+{%- else -%}
+  <div {{ shared_attrs }}>
+    {{ logo_tag }}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: var(--brand-logo-opacity, 0.7);
+    filter: grayscale(0);
+    transition: opacity 0.35s ease, filter 0.35s ease;
+    text-decoration: none;
+  }
+
+  .brand-logo--grayscale {
+    filter: grayscale(1);
+  }
+
+  .brand-logo--grayscale:hover,
+  .brand-logo--grayscale:focus-visible {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+
+  .brand-logo__image {
+    display: block;
+    height: var(--logo-height);
+    width: auto;
+    max-width: none;
+    object-fit: contain;
+  }
+
+  .brand-logo__placeholder {
+    height: var(--logo-height);
+    width: calc(var(--logo-height) * 2.5);
+    opacity: 0.25;
+  }
+
+  .brand-logo__placeholder-svg {
+    width: 100%;
+    height: 100%;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand logo",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:settings.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "grayscale",
+      "label": "Grayscale",
+      "info": "Logos appear muted and restore to full colour on hover",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "t:settings.opacity",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 65
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand logo",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

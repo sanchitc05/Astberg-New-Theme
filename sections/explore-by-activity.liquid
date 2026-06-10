@@ -1,0 +1,424 @@
+{%- assign sid = 'eba-' | append: section.id -%}
+
+<style>
+  #{{ sid }} {
+    background: {{ section.settings.background_color }};
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    overflow: hidden;
+  }
+
+  #{{ sid }} .eba-inner {
+    /* no side padding — track runs full width */
+  }
+
+  /* ── Heading ── */
+  #{{ sid }} .eba-heading-wrap {
+    padding: 0 clamp(20px, 5vw, 64px);
+    margin-bottom: clamp(20px, 3vw, 36px);
+  }
+  #{{ sid }} .eba-heading {
+    margin: 0;
+    font-size: clamp(11px, 1vw, 14px);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    line-height: 1;
+    display: flex;
+    gap: 0.4em;
+    align-items: baseline;
+    color: #fff;
+  }
+  #{{ sid }} .eba-heading__accent {
+    color: {{ section.settings.accent_color }};
+  }
+
+  /* ── Track ── */
+  #{{ sid }} .eba-track {
+    display: flex;
+    gap: clamp(8px, 1vw, 14px);
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+    cursor: grab;
+    padding-left: clamp(16px, 3vw, 32px);
+    padding-right: clamp(16px, 3vw, 32px);
+    scroll-padding-left: clamp(16px, 3vw, 32px);
+  }
+  #{{ sid }} .eba-track::-webkit-scrollbar { display: none; }
+  #{{ sid }} .eba-track.eba-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
+    user-select: none;
+  }
+
+  /* ── Card ── */
+  #{{ sid }} .eba-card {
+    flex: 0 0 clamp(160px, 21vw, 290px);
+    scroll-snap-align: start;
+    position: relative;
+    display: block;
+    text-decoration: none;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 3 / 5;
+    background: #1c1c1c;
+    flex-shrink: 0;
+  }
+
+  #{{ sid }} .eba-card__img-wrap {
+    position: absolute;
+    inset: 0;
+  }
+  #{{ sid }} .eba-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  #{{ sid }} .eba-card:hover .eba-card__img {
+    transform: scale(1.07);
+  }
+  #{{ sid }} .eba-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #252525, #1a1a1a);
+  }
+  #{{ sid }} .eba-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0,0,0,0) 25%,
+      rgba(0,0,0,0.35) 60%,
+      rgba(0,0,0,0.78) 100%
+    );
+    transition: opacity 0.35s ease;
+  }
+  #{{ sid }} .eba-card:hover .eba-card__overlay {
+    opacity: 0.9;
+  }
+
+  /* ── Vertical label ── */
+  #{{ sid }} .eba-card__label {
+    position: absolute;
+    bottom: 16px;
+    left: calc(clamp(42px, 5vw, 65px) + 16px);
+    white-space: nowrap;
+    transform: rotate(-90deg);
+    transform-origin: bottom left;
+    color: {{ section.settings.accent_color }};
+    font-size: clamp(42px, 5vw, 65px);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.45);
+    transition: letter-spacing 0.4s ease;
+    z-index: 2;
+    font-family: var(--font-primary);
+  }
+  #{{ sid }} .eba-card:hover .eba-card__label {
+    letter-spacing: 0.09em;
+  }
+
+  /* ── Footer row ── */
+  #{{ sid }} .eba-footer {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: clamp(16px, 2.5vw, 28px);
+    padding: 0 clamp(20px, 5vw, 64px);
+  }
+  #{{ sid }} .eba-progress-wrap { flex: 1; }
+  #{{ sid }} .eba-progress-bar {
+    height: 1.5px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  #{{ sid }} .eba-progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: {{ section.settings.accent_color }};
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+
+  /* ── Arrows ── */
+  #{{ sid }} .eba-arrows { display: flex; gap: 8px; flex-shrink: 0; }
+  #{{ sid }} .eba-arrow {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, opacity 0.25s;
+    padding: 0;
+    line-height: 1;
+  }
+  #{{ sid }} .eba-arrow svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  #{{ sid }} .eba-arrow:hover:not(:disabled) {
+    border-color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.07);
+  }
+  #{{ sid }} .eba-arrow:disabled { opacity: 0.22; cursor: default; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    #{{ sid }} .eba-card { flex: 0 0 clamp(150px, 42vw, 230px); }
+  }
+  @media (max-width: 540px) {
+    #{{ sid }} .eba-inner { padding: 0 16px; }
+    #{{ sid }} .eba-card { flex: 0 0 64vw; }
+    #{{ sid }} .eba-track {
+      padding-left: 8px;
+      scroll-padding-left: 8px;
+    }
+  }
+</style>
+
+<section id="{{ sid }}"{% if section.settings.section_width == 'page' %} style="grid-column: 2;"{% else %} style="grid-column: 1 / -1;"{% endif %}>
+  <div class="eba-inner">
+
+    <div class="eba-heading-wrap">
+      <h2 class="eba-heading h2">
+        <span class="eba-heading__prefix eyebrow eyebrow--lime">{{ section.settings.heading_prefix }}</span>
+        {%- if section.settings.heading_accent != blank -%}
+          <span class="eba-heading__accent text-gradient">{{ section.settings.heading_accent }}</span>
+        {%- endif -%}
+      </h2>
+    </div>
+
+
+    <div class="eba-track" id="{{ sid }}-track">
+      {%- for block in section.blocks -%}
+        <a
+          class="eba-card"
+          href="{{ block.settings.link | default: '#' }}"
+          aria-label="{{ block.settings.label }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="eba-card__img-wrap">
+            {%- if block.settings.image != blank -%}
+              {{
+                block.settings.image
+                | image_url: width: 600
+                | image_tag:
+                  class: 'eba-card__img',
+                  loading: 'lazy',
+                  widths: '280,400,560',
+                  sizes: '(max-width: 540px) 64vw, (max-width: 900px) 42vw, 22vw',
+                  alt: block.settings.label
+              }}
+            {%- else -%}
+              <div class="eba-card__placeholder"></div>
+            {%- endif -%}
+            <div class="eba-card__overlay"></div>
+          </div>
+          <span class="eba-card__label">{{ block.settings.label }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    <div class="eba-footer">
+      <div class="eba-progress-wrap">
+        <div class="eba-progress-bar">
+          <div class="eba-progress-fill" id="{{ sid }}-prog"></div>
+        </div>
+      </div>
+      <div class="eba-arrows">
+        <button class="eba-arrow" id="{{ sid }}-prev" aria-label="Previous" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <button class="eba-arrow" id="{{ sid }}-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  var track = document.getElementById('{{ sid }}-track');
+  var prog  = document.getElementById('{{ sid }}-prog');
+  var prev  = document.getElementById('{{ sid }}-prev');
+  var next  = document.getElementById('{{ sid }}-next');
+  if (!track) return;
+
+  function scrollStep() {
+    var card = track.querySelector('.eba-card');
+    if (!card) return 300;
+    var gap = parseFloat(getComputedStyle(track).gap) || 10;
+    return card.offsetWidth + gap;
+  }
+
+  function update() {
+    var max = track.scrollWidth - track.clientWidth;
+    prog.style.width = (max > 0 ? (track.scrollLeft / max) * 100 : 0) + '%';
+    prev.disabled = track.scrollLeft <= 1;
+    next.disabled = max <= 0 || track.scrollLeft >= max - 1;
+  }
+
+  track.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+
+  prev.addEventListener('click', function () {
+    track.scrollLeft -= scrollStep();
+  });
+  next.addEventListener('click', function () {
+    track.scrollLeft += scrollStep();
+  });
+
+  /* Drag to scroll */
+  var dragging = false, startX = 0, startLeft = 0;
+  track.addEventListener('mousedown', function (e) {
+    dragging = true;
+    startX = e.pageX - track.offsetLeft;
+    startLeft = track.scrollLeft;
+    track.classList.add('eba-dragging');
+  });
+  window.addEventListener('mouseup', function () {
+    if (!dragging) return;
+    dragging = false;
+    track.classList.remove('eba-dragging');
+  });
+  track.addEventListener('mousemove', function (e) {
+    if (!dragging) return;
+    e.preventDefault();
+    track.scrollLeft = startLeft - (e.pageX - track.offsetLeft - startX);
+  });
+  track.addEventListener('mouseleave', function () {
+    if (dragging) { dragging = false; track.classList.remove('eba-dragging'); }
+  });
+
+  update();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Explore by Activity",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading_prefix",
+      "label": "Heading prefix",
+      "default": "EXPLORE BY"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading accent word",
+      "default": "ACTIVITY"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "info": "Used for the card labels and progress bar",
+      "default": "#f6eddd"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "full", "label": "Full width" },
+        { "value": "page", "label": "Page width" }
+      ],
+      "default": "full"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Activity card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Activity name",
+          "default": "KITCHEN"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Explore by Activity",
+      "blocks": [
+        { "type": "card", "settings": { "label": "KITCHEN" } },
+        { "type": "card", "settings": { "label": "BATHROOM" } },
+        { "type": "card", "settings": { "label": "LIVING" } },
+        { "type": "card", "settings": { "label": "TOILET" } },
+        { "type": "card", "settings": { "label": "BEDROOM" } },
+        { "type": "card", "settings": { "label": "DINING" } },
+        { "type": "card", "settings": { "label": "LAUNDRY" } },
+        { "type": "card", "settings": { "label": "OFFICE" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

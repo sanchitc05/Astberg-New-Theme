@@ -1,0 +1,610 @@
+<section
+  id="CinematicHero-{{ section.id }}"
+  class="ch-hero"
+>
+  <canvas id="ch-canvas-{{ section.id }}" class="ch-canvas"></canvas>
+  <div class="ch-blob ch-b1"></div>
+  <div class="ch-blob ch-b2"></div>
+  <div class="ch-blob ch-b3"></div>
+  <div class="ch-grid"></div>
+
+  <div class="ch-container page-width">
+
+    {%- if section.settings.badge_text != blank -%}
+      <div class="ch-badge eyebrow eyebrow--lime">
+        <span class="ch-bdot"></span>
+        {{ section.settings.badge_text }}
+      </div>
+    {%- endif -%}
+
+    <h1 class="ch-h1 h1">
+      {%- if section.settings.heading_line_1 != blank -%}
+        {{ section.settings.heading_line_1 }}<br>
+      {%- endif -%}
+      {%- if section.settings.heading_line_2 != blank -%}
+        {{ section.settings.heading_line_2 }}<br>
+      {%- endif -%}
+      {%- if section.settings.heading_line_3 != blank -%}
+        <em class="ch-h1-em text-gradient">{{ section.settings.heading_line_3 }}</em>
+      {%- endif -%}
+    </h1>
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="ch-sub lede--light">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+
+    <div class="ch-ctas">
+      {%- if section.settings.button_1_label != blank -%}
+        <a href="{{ section.settings.button_1_link | default: '#' }}" class="ch-btn ch-btn-primary btn--semibold">
+          {{ section.settings.button_1_label }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.button_2_label != blank -%}
+        <a href="{{ section.settings.button_2_link | default: '#' }}" class="ch-btn ch-btn-ghost btn">
+          {{ section.settings.button_2_label }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- assign has_stats = false -%}
+    {%- if section.settings.stat_1_number != blank or section.settings.stat_2_number != blank or section.settings.stat_3_number != blank or section.settings.stat_4_number != blank -%}
+      {%- assign has_stats = true -%}
+    {%- endif -%}
+
+    {%- if has_stats -%}
+      <div class="ch-stats">
+        {%- if section.settings.stat_1_number != blank -%}
+          <div class="ch-stat">
+            <span class="ch-stat-n stat-number">{{ section.settings.stat_1_number }}</span>
+            <span class="ch-stat-l stat-label">{{ section.settings.stat_1_label }}</span>
+          </div>
+          {%- if section.settings.stat_2_number != blank or section.settings.stat_3_number != blank or section.settings.stat_4_number != blank -%}
+            <div class="ch-divider"></div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if section.settings.stat_2_number != blank -%}
+          <div class="ch-stat">
+            <span class="ch-stat-n stat-number">{{ section.settings.stat_2_number }}</span>
+            <span class="ch-stat-l stat-label">{{ section.settings.stat_2_label }}</span>
+          </div>
+          {%- if section.settings.stat_3_number != blank or section.settings.stat_4_number != blank -%}
+            <div class="ch-divider"></div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if section.settings.stat_3_number != blank -%}
+          <div class="ch-stat">
+            <span class="ch-stat-n stat-number mono">{{ section.settings.stat_3_number }}</span>
+            <span class="ch-stat-l stat-label">{{ section.settings.stat_3_label }}</span>
+          </div>
+          {%- if section.settings.stat_4_number != blank -%}
+            <div class="ch-divider"></div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if section.settings.stat_4_number != blank -%}
+          <div class="ch-stat">
+            <span class="ch-stat-n stat-number">{{ section.settings.stat_4_number }}</span>
+            <span class="ch-stat-l stat-label">{{ section.settings.stat_4_label }}</span>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+
+  </div>
+
+  {%- if section.settings.show_scroll_indicator -%}
+    <div class="ch-scroll">
+      <span>Scroll to explore</span>
+      <div class="ch-scroll-line"></div>
+    </div>
+  {%- endif -%}
+
+</section>
+
+{% stylesheet %}
+  .ch-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background-color: #111827;
+    overflow: hidden;
+  }
+
+  /* Canvas */
+  .ch-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: .55;
+  }
+
+  /* Blobs */
+  .ch-blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(90px);
+  }
+  .ch-b1 {
+    width: 750px;
+    height: 750px;
+    right: -160px;
+    top: -200px;
+    background: radial-gradient(circle, rgba(14,122,67,.48) 0%, transparent 68%);
+    animation: ch-hblob 12s ease-in-out infinite;
+  }
+  .ch-b2 {
+    width: 560px;
+    height: 560px;
+    left: -120px;
+    bottom: -130px;
+    background: radial-gradient(circle, rgba(0,178,107,.3) 0%, transparent 68%);
+    animation: ch-hblob 16s ease-in-out infinite 4s reverse;
+  }
+  .ch-b3 {
+    width: 420px;
+    height: 420px;
+    left: 44%;
+    top: 52%;
+    background: radial-gradient(circle, rgba(167,244,50,.13) 0%, transparent 68%);
+    animation: ch-hblob 20s ease-in-out infinite 8s;
+  }
+  @keyframes ch-hblob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(28px, -22px) scale(1.06); }
+    66%       { transform: translate(-20px, 26px) scale(.94); }
+  }
+
+  /* Grid */
+  .ch-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-image:
+      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+  }
+
+  /* Container */
+  .ch-container {
+    position: relative;
+    z-index: 2;
+    padding-top: 120px;
+    padding-bottom: 80px;
+  }
+
+  /* Badge */
+  .ch-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,178,107,.13);
+    border: 1px solid rgba(0,178,107,.3);
+    color: #A7F432;
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+  }
+  .ch-bdot {
+    width: 6px;
+    height: 6px;
+    background: #A7F432;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: ch-bdot 2s ease-in-out infinite;
+  }
+  @keyframes ch-bdot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .35; transform: scale(.72); }
+  }
+
+  /* Heading */
+  .ch-h1 {
+    font-size: clamp(50px, 7.8vw, 116px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -.035em;
+    color: #fff;
+    margin: 0 0 28px 0;
+  }
+  .ch-h1-em {
+    font-style: normal;
+    background: linear-gradient(115deg, #00B26B 0%, #A7F432 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Subheading */
+  .ch-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.74;
+    color: rgba(255,255,255,.58);
+    max-width: 500px;
+    margin: 0 0 48px 0;
+  }
+
+  /* Buttons */
+  .ch-ctas {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 72px;
+  }
+  .ch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1;
+    padding: 17px 36px;
+    border-radius: 11px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all .22s ease;
+  }
+  .ch-btn-primary {
+    background: #00B26B;
+    color: #fff;
+  }
+  .ch-btn-primary:hover {
+    background: #0E7A43;
+    transform: translateY(-1px);
+    color: #fff;
+  }
+  .ch-btn-ghost {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.22);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .ch-btn-ghost:hover {
+    background: rgba(255,255,255,.18);
+    color: #fff;
+  }
+
+  /* Stats */
+  .ch-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    flex-wrap: wrap;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ch-stats {
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      padding-bottom: 1rem;
+      scrollbar-width: none;
+      gap: 32px;
+      max-width: 100%;
+      margin-inline: calc(var(--page-margin, 16px) * -1);
+      padding-inline: var(--page-margin, 16px);
+      scroll-padding-inline: var(--page-margin, 16px);
+    }
+    .ch-stats::-webkit-scrollbar { display: none; }
+    .ch-stat {
+      flex: 0 0 auto;
+      min-width: 140px;
+      scroll-snap-align: center;
+    }
+    .ch-divider {
+      display: none;
+    }
+  }
+
+  .ch-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+  }
+  .ch-stat-n {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.025em;
+    color: #fff;
+  }
+  .ch-stat-l {
+    font-size: 12.5px;
+    color: rgba(255,255,255,.42);
+  }
+  .ch-divider {
+    width: 1px;
+    height: 46px;
+    background: rgba(255,255,255,.1);
+    flex-shrink: 0;
+  }
+
+  /* Scroll indicator */
+  .ch-scroll {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,.32);
+    font-size: 10.5px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ch-scroll-line {
+    width: 1px;
+    height: 38px;
+    background: linear-gradient(to bottom, rgba(255,255,255,.35), transparent);
+    animation: ch-sdown 2s ease-in-out infinite;
+  }
+  @keyframes ch-sdown {
+    0%   { opacity: 0; transform: translateY(-8px); }
+    50%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(8px); }
+  }
+
+  /* Responsive */
+  @media screen and (max-width: 749px) {
+    .ch-container {
+      padding-top: 100px;
+      padding-bottom: 60px;
+    }
+    .ch-h1 {
+      font-size: clamp(2rem, 9vw, 3.25rem);
+      letter-spacing: -0.025em;
+    }
+    .ch-sub {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+    .ch-stat-n {
+      font-size: 28px;
+    }
+    .ch-ctas {
+      flex-direction: column;
+      margin-bottom: 2.5rem;
+    }
+    .ch-btn {
+      justify-content: center;
+      width: 100%;
+    }
+    .ch-scroll {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+    var canvas = document.getElementById('ch-canvas-' + sectionId);
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var pts = [];
+    var rafId;
+
+    function resize() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    for (var i = 0; i < 65; i++) {
+      pts.push({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.38,
+        vy: -(Math.random() * 0.38 + 0.08),
+        r:  Math.random() * 2.2 + 0.5,
+        o:  Math.random() * 0.48 + 0.1,
+        c:  Math.random() > 0.5 ? '0,178,107' : '167,244,50'
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pts.forEach(function(p) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + p.c + ',' + p.o + ')';
+        ctx.fill();
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.y < -8)               p.y = canvas.height + 8;
+        if (p.x < -8)               p.x = canvas.width + 8;
+        if (p.x > canvas.width + 8) p.x = -8;
+      });
+      rafId = requestAnimationFrame(draw);
+    }
+    draw();
+
+    document.addEventListener('shopify:section:unload', function(e) {
+      if (e.detail.sectionId === sectionId) {
+        cancelAnimationFrame(rafId);
+      }
+    });
+
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail.sectionId === sectionId) {
+        cancelAnimationFrame(rafId);
+        resize();
+        draw();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Cinematic Hero",
+  "tag": "section",
+  "class": "cinematic-hero-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge text",
+      "default": "ADVANCED EUROPEAN VENTILATION TECHNOLOGY"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_1",
+      "label": "Heading line 1",
+      "default": "Fresh Air."
+    },
+    {
+      "type": "text",
+      "id": "heading_line_2",
+      "label": "Heading line 2",
+      "default": "Lower Carbon."
+    },
+    {
+      "type": "text",
+      "id": "heading_line_3",
+      "label": "Heading line 3 (green gradient)",
+      "default": "Smarter Buildings."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Advanced ventilation systems designed for healthier indoor environments and a sustainable future."
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "button_1_label",
+      "label": "Primary button label",
+      "default": "Explore Solutions"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "button_2_label",
+      "label": "Secondary button label",
+      "default": "Calculate Indoor Air Quality"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Stats"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_number",
+      "label": "Stat 1 — number",
+      "default": "96%"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Stat 1 — label",
+      "default": "Heat Recovery Efficiency"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_number",
+      "label": "Stat 2 — number",
+      "default": "50%"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Stat 2 — label",
+      "default": "Energy Savings"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_number",
+      "label": "Stat 3 — number",
+      "default": "ISO 16890"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Stat 3 — label",
+      "default": "Certified Filtration"
+    },
+    {
+      "type": "text",
+      "id": "stat_4_number",
+      "label": "Stat 4 — number",
+      "default": "Net Zero"
+    },
+    {
+      "type": "text",
+      "id": "stat_4_label",
+      "label": "Stat 4 — label",
+      "default": "Ready Systems"
+    },
+    {
+      "type": "header",
+      "content": "Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "label": "Show scroll indicator",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cinematic Hero",
+      "category": "Hero"
+    }
+  ]
+}
+{% endschema %}

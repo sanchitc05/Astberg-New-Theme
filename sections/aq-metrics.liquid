@@ -1,0 +1,266 @@
+<div id="AqMetrics-{{ section.id }}">
+  <section class="aqm-section">
+    <div class="aqm-container">
+
+      <div class="aqm-header">
+        {% if section.settings.eyebrow != blank %}
+          <p class="aqm-eyebrow eyebrow">{{ section.settings.eyebrow }}</p>
+        {% endif %}
+        {% if section.settings.heading != blank %}
+          <h2 class="aqm-heading h2">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.description != blank %}
+          <p class="aqm-desc lede">{{ section.settings.description }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.blocks.size > 0 %}
+        <div class="aqm-card-wrap">
+          <div class="aqm-grid" style="grid-template-columns: repeat({{ section.blocks.size }}, 1fr);">
+            {% for block in section.blocks %}
+              <div class="aqm-metric" {{ block.shopify_attributes }}>
+                <div class="aqm-delta eyebrow eyebrow--lime">Δ Average</div>
+                <div class="aqm-value-row">
+                  <span class="aqm-num metric-number"
+                    data-target="{{ block.settings.value }}"
+                    data-dec="{{ block.settings.decimals }}">{{ block.settings.value }}</span>
+                  <span class="aqm-unit stat-label">{{ block.settings.unit }}</span>
+                </div>
+                <p class="aqm-label stat-label">{{ block.settings.label }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+/* ── Section ── */
+#AqMetrics-{{ section.id }} .aqm-section { padding: 96px 0; background: #fff; overflow-x: clip; }
+#AqMetrics-{{ section.id }} .aqm-container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+#AqMetrics-{{ section.id }} *, #AqMetrics-{{ section.id }} *::before, #AqMetrics-{{ section.id }} *::after { box-sizing: border-box; }
+
+/* ── Header ── */
+#AqMetrics-{{ section.id }} .aqm-header { max-width: 768px; margin-bottom: 56px; }
+#AqMetrics-{{ section.id }} .aqm-eyebrow {
+  font-size: 10px; font-weight: 500; letter-spacing: .14em;
+  text-transform: uppercase; color: #0E7A43; margin: 0 0 16px; line-height: 1;
+}
+#AqMetrics-{{ section.id }} .aqm-heading {
+  font-size: clamp(30px, 4vw, 48px); font-weight: 600; line-height: 1.1;
+  letter-spacing: -.025em; color: #111827; margin: 0 0 16px;
+}
+#AqMetrics-{{ section.id }} .aqm-desc {
+  font-size: 16px; line-height: 1.7; color: #6B7280; margin: 0; max-width: 640px;
+}
+
+/* ── Card wrapper ── */
+#AqMetrics-{{ section.id }} .aqm-card-wrap {
+  border-radius: 24px;
+  background: linear-gradient(135deg, #162a1e 0%, #111827 100%);
+  overflow: hidden;
+}
+
+/* ── Grid ── */
+#AqMetrics-{{ section.id }} .aqm-grid {
+  display: grid;
+}
+
+@media screen and (max-width: 639px) {
+  #AqMetrics-{{ section.id }} .aqm-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+  #AqMetrics-{{ section.id }} .aqm-grid::-webkit-scrollbar { display: none; }
+  #AqMetrics-{{ section.id }} .aqm-metric {
+    flex: 0 0 min(85vw, 20rem);
+    scroll-snap-align: start;
+    border-right: none;
+    border-bottom: none;
+  }
+  #AqMetrics-{{ section.id }} .aqm-metric:nth-child(odd) { border-right: none; }
+}
+
+/* ── Metric cell ── */
+#AqMetrics-{{ section.id }} .aqm-metric {
+  padding: 32px; color: #fff;
+  border-right: 1px solid rgba(255,255,255,.1);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#AqMetrics-{{ section.id }} .aqm-metric:last-child { border-right: none; }
+
+/* ── Δ Average label ── */
+#AqMetrics-{{ section.id }} .aqm-delta {
+  font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: #A7F432; margin-bottom: 12px; line-height: 1;
+}
+
+/* ── Number + unit ── */
+#AqMetrics-{{ section.id }} .aqm-value-row {
+  display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px;
+}
+#AqMetrics-{{ section.id }} .aqm-num {
+  font-size: 40px; font-weight: 600; line-height: 1; letter-spacing: -.025em;
+}
+#AqMetrics-{{ section.id }} .aqm-unit {
+  font-size: 20px; font-weight: 400; color: rgba(255,255,255,.65); line-height: 1;
+}
+
+/* ── Label ── */
+#AqMetrics-{{ section.id }} .aqm-label {
+  font-size: 14px; line-height: 1.4; color: rgba(255,255,255,.65); margin: 0;
+}
+
+/* ── Responsive: tablet (2 cols) ── */
+@media (max-width: 1023px) {
+  #AqMetrics-{{ section.id }} .aqm-grid { grid-template-columns: repeat(2, 1fr); }
+  #AqMetrics-{{ section.id }} .aqm-metric { border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+  #AqMetrics-{{ section.id }} .aqm-metric:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.1); }
+  #AqMetrics-{{ section.id }} .aqm-metric:last-child { border-right: none; border-bottom: none; }
+}
+
+/* ── Responsive: mobile ── */
+@media (max-width: 639px) {
+  #AqMetrics-{{ section.id }} .aqm-section { padding: 64px 0; }
+  #AqMetrics-{{ section.id }} .aqm-container { padding: 0 var(--page-margin, 16px); }
+  #AqMetrics-{{ section.id }} .aqm-header { margin-bottom: 36px; }
+  #AqMetrics-{{ section.id }} .aqm-num { font-size: 36px; }
+}
+{% endstylesheet %}
+
+<script>
+(function () {
+  var sid  = '{{ section.id }}';
+  var root = document.getElementById('AqMetrics-' + sid);
+  if (!root) return;
+
+  var cells = root.querySelectorAll('.aqm-metric');
+  var nums  = root.querySelectorAll('.aqm-num');
+
+  /* ── counter animation ── */
+  function animateCounter(el) {
+    var target = parseFloat(el.dataset.target);
+    var dec    = parseInt(el.dataset.dec, 10) || 0;
+    var start  = performance.now();
+    var dur    = 1400;
+    function tick(now) {
+      var p     = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * eased).toFixed(dec);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target.toFixed(dec);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function revealAll() {
+    cells.forEach(function (c, i) {
+      setTimeout(function () {
+        c.style.opacity = '1';
+        c.style.transform = 'none';
+      }, i * 80);
+    });
+  }
+
+  function setInitialHidden() {
+    cells.forEach(function (c) {
+      c.style.opacity = '0';
+      c.style.transform = 'translateY(16px)';
+    });
+  }
+
+  /* apply hidden state via JS only — elements are visible if JS fails */
+  setInitialHidden();
+
+  /* safety net: always reveal after 1.2s regardless of scroll state */
+  var revealDone = false;
+  var safetyTimer = setTimeout(function () {
+    if (!revealDone) { revealDone = true; revealAll(); }
+  }, 1200);
+
+  if ('IntersectionObserver' in window) {
+    /* staggered reveal on scroll */
+    var revealObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting || revealDone) return;
+        revealDone = true;
+        clearTimeout(safetyTimer);
+        revealAll();
+        revealObs.disconnect();
+      });
+    }, { threshold: 0.15 });
+    if (cells.length) revealObs.observe(cells[0]);
+
+    /* counter on scroll */
+    var cntObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        animateCounter(entry.target);
+        cntObs.unobserve(entry.target);
+      });
+    }, { threshold: 0.4 });
+    nums.forEach(function (el) { cntObs.observe(el); });
+
+  } else {
+    clearTimeout(safetyTimer);
+    revealAll();
+    nums.forEach(function (el) {
+      el.textContent = parseFloat(el.dataset.target).toFixed(parseInt(el.dataset.dec, 10) || 0);
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "AQ Metrics",
+  "tag": "div",
+  "settings": [
+    { "type": "text",     "id": "eyebrow",     "label": "Eyebrow",     "default": "Air Quality Metrics" },
+    { "type": "text",     "id": "heading",     "label": "Heading",     "default": "Measurable impact, every minute." },
+    { "type": "textarea", "id": "description", "label": "Description", "default": "Aggregate performance from Astberg installations across commercial, residential and healthcare deployments." }
+  ],
+  "blocks": [
+    {
+      "type": "metric",
+      "name": "Metric",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Lower CO₂" },
+        { "type": "text", "id": "value", "label": "Value (number)", "default": "62" },
+        { "type": "text", "id": "unit",  "label": "Unit",  "default": "%" },
+        {
+          "type": "select", "id": "decimals", "label": "Decimal places", "default": "0",
+          "options": [
+            { "value": "0", "label": "0  — e.g. 62" },
+            { "value": "1", "label": "1  — e.g. 6.4" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "AQ Metrics",
+      "category": "Content",
+      "blocks": [
+        { "type": "metric", "settings": { "label": "Lower CO₂",         "value": "62",  "unit": "%",     "decimals": "0" } },
+        { "type": "metric", "settings": { "label": "Lower PM2.5",        "value": "89",  "unit": "%",     "decimals": "0" } },
+        { "type": "metric", "settings": { "label": "Lower PM10",         "value": "84",  "unit": "%",     "decimals": "0" } },
+        { "type": "metric", "settings": { "label": "Lower VOC",          "value": "73",  "unit": "%",     "decimals": "0" } },
+        { "type": "metric", "settings": { "label": "Fresh Air Exchange", "value": "6.4", "unit": "× / hr","decimals": "1" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

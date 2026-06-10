@@ -1,0 +1,352 @@
+<!-- sections/scroll-text-reveal.liquid -->
+
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+{%- if section.settings.inline_image_1 -%}
+  <link rel="preload" as="image" href="{{ section.settings.inline_image_1 | image_url: width: 800 }}">
+{%- endif -%}
+{%- if section.settings.inline_image_2 -%}
+  <link rel="preload" as="image" href="{{ section.settings.inline_image_2 | image_url: width: 800 }}">
+{%- endif -%}
+{%- if section.settings.inline_image_3 -%}
+  <link rel="preload" as="image" href="{{ section.settings.inline_image_3 | image_url: width: 800 }}">
+{%- endif -%}
+
+{% liquid
+  assign text_1  = section.settings.text_1 | strip
+  assign text_2  = section.settings.text_2 | strip
+  assign text_3  = section.settings.text_3 | strip
+  assign text_4  = section.settings.text_4 | strip
+  assign words_1 = text_1 | split: ' '
+  assign words_2 = text_2 | split: ' '
+  assign words_3 = text_3 | split: ' '
+  assign words_4 = text_4 | split: ' '
+  assign img_h   = section.settings.image_height
+  assign img_h_m = section.settings.image_height | times: 0.65 | round
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<section
+  id="str-{{ section.id }}"
+  class="str-section spacing-style color-{{ section.settings.color_scheme }}"
+  style="{% render 'spacing-style', settings: section.settings %}--str-size: {{ section.settings.text_size }}px;"
+  {{ section.shopify_attributes }}
+>
+  <div class="str-inner section section--page-width">
+
+    {% capture aria_full %}{{ text_1 }}{% if text_2 != blank %} {{ text_2 }}{% endif %}{% if text_3 != blank %} {{ text_3 }}{% endif %}{% if text_4 != blank %} {{ text_4 }}{% endif %}{% endcapture %}
+
+    <div class="str-heading" aria-label="{{ aria_full | strip | escape }}">
+
+      {%- for word in words_1 -%}
+        {%- unless word == blank -%}
+          <span class="str-word" aria-hidden="true">{{ word }}</span>
+        {%- endunless -%}
+      {%- endfor -%}
+
+      {%- if section.settings.inline_image_1 -%}
+        <span class="str-image-wrap" aria-hidden="true" data-height="{{ img_h }}" data-height-mobile="{{ img_h_m }}">
+          {{- section.settings.inline_image_1 | image_url: width: 600 | image_tag: class: 'str-image', widths: '100, 200, 300, 400, 500, 600', alt: '', loading: 'eager' -}}
+        </span>
+      {%- endif -%}
+
+      {%- for word in words_2 -%}
+        {%- unless word == blank -%}
+          <span class="str-word" aria-hidden="true">{{ word }}</span>
+        {%- endunless -%}
+      {%- endfor -%}
+
+      {%- if section.settings.inline_image_2 -%}
+        <span class="str-image-wrap" aria-hidden="true" data-height="{{ img_h }}" data-height-mobile="{{ img_h_m }}">
+          {{- section.settings.inline_image_2 | image_url: width: 600 | image_tag: class: 'str-image', widths: '100, 200, 300, 400, 500, 600', alt: '', loading: 'eager' -}}
+        </span>
+      {%- endif -%}
+
+      {%- for word in words_3 -%}
+        {%- unless word == blank -%}
+          <span class="str-word" aria-hidden="true">{{ word }}</span>
+        {%- endunless -%}
+      {%- endfor -%}
+
+      {%- if section.settings.inline_image_3 -%}
+        <span class="str-image-wrap" aria-hidden="true" data-height="{{ img_h }}" data-height-mobile="{{ img_h_m }}">
+          {{- section.settings.inline_image_3 | image_url: width: 600 | image_tag: class: 'str-image', widths: '100, 200, 300, 400, 500, 600', alt: '', loading: 'eager' -}}
+        </span>
+      {%- endif -%}
+
+      {%- for word in words_4 -%}
+        {%- unless word == blank -%}
+          <span class="str-word" aria-hidden="true">{{ word }}</span>
+        {%- endunless -%}
+      {%- endfor -%}
+
+    </div>
+  </div>
+</section>
+
+<style>
+  #str-{{ section.id }} {
+    overflow: hidden;
+  }
+
+  #str-{{ section.id }} .str-inner {
+    padding-block: 0;
+  }
+
+  #str-{{ section.id }} .str-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2em 0.28em;
+    font-size: clamp(calc(var(--str-size) * 0.38), 7.5vw, var(--str-size));
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+  }
+
+  #str-{{ section.id }} .str-word {
+    display: inline-block;
+    opacity: 0.08;
+    will-change: opacity, transform;
+  }
+
+  #str-{{ section.id }} .str-image-wrap {
+    display: block;
+    height: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    border-radius: {{ section.settings.image_radius }}px;
+    opacity: 0;
+    will-change: height, opacity;
+  }
+
+  #str-{{ section.id }} .str-image {
+    display: block;
+    height: 100%;
+    width: auto;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  @media screen and (max-width: 749px) {
+    #str-{{ section.id }} .str-heading {
+      gap: 0.15em 0.22em;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  if (!window._strScrollReset) {
+    window._strScrollReset = true;
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }
+
+  var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
+  var ST_CDN   = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js';
+  var ST_ID    = 'str-{{ section.id }}';
+
+  function runAnimation() {
+    var sectionEl = document.getElementById(ST_ID);
+    if (!sectionEl) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    var prev = ScrollTrigger.getById(ST_ID);
+    if (prev) prev.kill();
+
+    var isMobile   = window.matchMedia('(max-width: 749px)').matches;
+    var words      = Array.from(sectionEl.querySelectorAll('.str-word'));
+    var images     = Array.from(sectionEl.querySelectorAll('.str-image-wrap'));
+    var allTargets = Array.from(sectionEl.querySelectorAll('.str-word, .str-image-wrap'));
+
+    if (allTargets.length === 0) return;
+
+    gsap.set(words,  { opacity: 0.08, y: 5 });
+    gsap.set(images, { height: 0, opacity: 0, filter: 'blur(8px)' });
+
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        id: ST_ID,
+        trigger: sectionEl,
+        start: 'top 90%',
+        end: 'top 10%',
+        scrub: 1.2,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    allTargets.forEach(function(el, i) {
+      var pos = i * 0.07;
+      if (el.classList.contains('str-image-wrap')) {
+        var h = parseInt(isMobile ? el.dataset.heightMobile : el.dataset.height) || 100;
+        tl.to(el, { height: h, opacity: 1, filter: 'blur(0px)', ease: 'power2.out', duration: 0.7 }, pos);
+      } else {
+        tl.to(el, { opacity: 1, y: 0, ease: 'power1.inOut', duration: 0.45 }, pos);
+      }
+    });
+  }
+
+  function loadScript(src, cb) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function init() {
+    if (window.gsap && window.ScrollTrigger) {
+      runAnimation();
+    } else if (window.gsap) {
+      loadScript(ST_CDN, runAnimation);
+    } else {
+      loadScript(GSAP_CDN, function() { loadScript(ST_CDN, runAnimation); });
+    }
+  }
+
+  document.addEventListener('shopify:section:load', function(e) {
+    if (e.detail.sectionId === '{{ section.id }}') init();
+  });
+
+  init();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Scroll Text Reveal",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text segments"
+    },
+    {
+      "type": "textarea",
+      "id": "text_1",
+      "label": "Text before image 1",
+      "default": "IN A"
+    },
+    {
+      "type": "textarea",
+      "id": "text_2",
+      "label": "Text after image 1",
+      "default": "WORLD FULL OF NOISE, WE HELP BRANDS STAND OUT"
+    },
+    {
+      "type": "textarea",
+      "id": "text_3",
+      "label": "Text after image 2",
+      "info": "Leave blank if not using a second image"
+    },
+    {
+      "type": "textarea",
+      "id": "text_4",
+      "label": "Text after image 3",
+      "info": "Leave blank if not using a third image"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "inline_image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "inline_image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "inline_image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Image height",
+      "min": 48,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image corner radius",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 48,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scroll Text Reveal",
+      "category": "t:categories.text",
+      "settings": {
+        "text_1": "IN A",
+        "text_2": "WORLD FULL OF NOISE, WE HELP BRANDS STAND OUT"
+      }
+    }
+  ]
+}
+{% endschema %}

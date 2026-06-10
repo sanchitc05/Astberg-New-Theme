@@ -1,0 +1,618 @@
+<section id="NetZero-{{ section.id }}" class="ntz-section">
+  <div class="ntz-wm" aria-hidden="true">{{ section.settings.watermark }}</div>
+  <div class="page-width ntz-inner">
+
+    <div class="ntz-head" data-reveal>
+      <p class="ntz-eyebrow eyebrow">{{ section.settings.eyebrow }}</p>
+      <h2 class="ntz-h2 h2">{{ section.settings.title }}</h2>
+      <p class="ntz-lead lede--light">{{ section.settings.body }}</p>
+    </div>
+
+    <div class="ntz-grid">
+
+      <div class="ntz-timeline">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'timeline_item' -%}
+            <div class="ntz-item" data-reveal {{ block.shopify_attributes }}>
+              <div class="ntz-dot-col">
+                <div class="ntz-dot"></div>
+                <div class="ntz-line"></div>
+              </div>
+              <div class="ntz-item-body">
+                <div class="ntz-yr mono">{{ block.settings.year }}</div>
+                <div class="ntz-ttl">{{ block.settings.title }}</div>
+                <div class="ntz-dsc">{{ block.settings.description }}</div>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <div class="ntz-stats" data-reveal>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'stat' -%}
+            <div class="ntz-stat" {{ block.shopify_attributes }}>
+              <div class="ntz-stat-n stat-number">{{ block.settings.number }}</div>
+              <div class="ntz-stat-l stat-label">{{ block.settings.label }}</div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .ntz-section {
+    background: linear-gradient(148deg, #063320 0%, #0E7A43 48%, #084a28 100%);
+    padding: 120px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ntz-wm {
+    position: absolute;
+    font-size: 380px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    color: rgba(255, 255, 255, 0.028);
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .ntz-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .ntz-head {
+    margin-bottom: 64px;
+  }
+
+  .ntz-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #A7F432;
+    margin: 0 0 16px 0;
+  }
+
+  .ntz-h2 {
+    font-size: clamp(36px, 4.6vw, 66px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+  }
+
+  .ntz-lead {
+    font-size: 18px;
+    line-height: 1.78;
+    color: rgba(255, 255, 255, 0.52);
+    max-width: 630px;
+    margin: 0;
+  }
+
+  /* Two-column grid */
+  .ntz-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  /* ── Timeline ── */
+  .ntz-timeline {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media screen and (max-width: 639px) {
+    .ntz-timeline {
+      flex-direction: row;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      padding-bottom: 1.5rem;
+      scrollbar-width: none;
+      gap: 0;
+      max-width: 100%;
+      margin-inline: calc(var(--page-margin, 16px) * -1);
+      padding-inline: var(--page-margin, 16px);
+      scroll-padding-inline: var(--page-margin, 16px);
+    }
+    .ntz-timeline::-webkit-scrollbar { display: none; }
+    .ntz-item {
+      flex: 0 0 min(85vw, 22rem);
+      scroll-snap-align: start;
+      padding-bottom: 0 !important;
+    }
+    .ntz-dot-col {
+      height: 100%;
+    }
+    .ntz-line {
+      width: 100% !important;
+      height: 1px !important;
+      min-height: 0 !important;
+      transform: scaleX(0);
+      transform-origin: left;
+      margin-top: 10px !important;
+    }
+    #NetZero-{{ section.id }} .ntz-item.ntz-visible .ntz-line {
+      transform: scaleX(1);
+    }
+  }
+
+  .ntz-item {
+    display: flex;
+    gap: 22px;
+    padding-bottom: 38px;
+    cursor: default;
+  }
+
+  .ntz-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .ntz-item:last-child .ntz-line {
+    display: none;
+  }
+
+  .ntz-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Dot with ripple-pulse */
+  @keyframes ntz-dot-ripple {
+    0%   { box-shadow: 0 0 0 0 rgba(167, 244, 50, 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(167, 244, 50, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(167, 244, 50, 0); }
+  }
+
+  .ntz-dot {
+    width: 14px;
+    height: 14px;
+    background: #A7F432;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+    animation: ntz-dot-ripple 2.6s ease-out infinite;
+    transition: background 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
+  }
+
+  /* Stagger dot animation so not all pulse together */
+  .ntz-item:nth-child(2) .ntz-dot { animation-delay: 0.65s; }
+  .ntz-item:nth-child(3) .ntz-dot { animation-delay: 1.3s; }
+  .ntz-item:nth-child(4) .ntz-dot { animation-delay: 1.95s; }
+
+  /* Connecting line — draws down on reveal */
+  .ntz-line {
+    width: 1px;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.12);
+    margin-top: 5px;
+    min-height: 20px;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.35s;
+  }
+
+  #NetZero-{{ section.id }} .ntz-item.ntz-visible .ntz-line {
+    transform: scaleY(1);
+  }
+
+  /* Timeline item hover */
+  .ntz-item:hover .ntz-dot {
+    background: #ffffff;
+    border-color: rgba(167, 244, 50, 0.7);
+    transform: scale(1.25);
+  }
+
+  .ntz-item-body {
+    padding-top: 0;
+  }
+
+  .ntz-yr {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #A7F432;
+    margin-bottom: 5px;
+    transition: color 0.2s ease;
+  }
+
+  .ntz-ttl {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+    margin-bottom: 6px;
+    transition: color 0.2s ease;
+  }
+
+  .ntz-item:hover .ntz-ttl {
+    color: #A7F432;
+  }
+
+  .ntz-item:hover .ntz-yr {
+    color: #ffffff;
+  }
+
+  .ntz-dsc {
+    font-size: 13.5px;
+    line-height: 1.68;
+    color: rgba(255, 255, 255, 0.48);
+  }
+
+  /* ── Stats 2×2 grid ── */
+  .ntz-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-content: start;
+  }
+
+  @media screen and (max-width: 639px) {
+    .ntz-stats {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      padding-bottom: 1rem;
+      scrollbar-width: none;
+      max-width: 100%;
+      margin-inline: calc(var(--page-margin, 16px) * -1);
+      padding-inline: var(--page-margin, 16px);
+      scroll-padding-inline: var(--page-margin, 16px);
+    }
+    .ntz-stats::-webkit-scrollbar { display: none; }
+    .ntz-stat {
+      flex: 0 0 min(85vw, 20rem);
+      scroll-snap-align: start;
+    }
+  }
+
+  .ntz-stat {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 32px;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: default;
+  }
+
+  .ntz-stat:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(167, 244, 50, 0.38);
+    transform: translateY(-5px);
+    box-shadow: 0 16px 48px -8px rgba(14, 122, 67, 0.45);
+  }
+
+  .ntz-stat-n {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #A7F432;
+    margin-bottom: 7px;
+    transition: transform 0.2s ease;
+    display: inline-block;
+  }
+
+  .ntz-stat:hover .ntz-stat-n {
+    transform: scale(1.05);
+  }
+
+  .ntz-stat-l {
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.58);
+  }
+
+  /* ── Reveal animation ── */
+  #NetZero-{{ section.id }} [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  #NetZero-{{ section.id }} [data-reveal].ntz-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── Responsive ── */
+  @media screen and (max-width: 1023px) {
+    .ntz-grid {
+      grid-template-columns: 1fr;
+      gap: 56px;
+    }
+    .ntz-stats {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media screen and (max-width: 639px) {
+    .ntz-section {
+      padding: 80px 0;
+    }
+    .ntz-wm {
+      font-size: 200px;
+    }
+    .ntz-stat-n {
+      font-size: 40px;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('NetZero-{{ section.id }}');
+    if (!root) return;
+
+    /* ── Count-up animation ── */
+    function countUp(el, target, suffix, duration) {
+      var start = null;
+      var original = el.textContent;
+      function step(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(eased * target) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target + suffix;
+      }
+      requestAnimationFrame(step);
+    }
+
+    function initCountUps() {
+      root.querySelectorAll('.ntz-stat-n').forEach(function (el) {
+        var text = el.textContent.trim();
+        var match = text.match(/^(\d+(?:\.\d+)?)(.*)/);
+        if (!match) return;
+        el.setAttribute('data-ntz-target', match[1]);
+        el.setAttribute('data-ntz-suffix', match[2]);
+      });
+    }
+
+    /* ── Reveal ── */
+    function initReveal() {
+      if (!('IntersectionObserver' in window)) {
+        root.querySelectorAll('[data-reveal]').forEach(function (el) {
+          el.classList.add('ntz-visible');
+        });
+        root.querySelectorAll('[data-ntz-target]').forEach(function (el) {
+          countUp(el, +el.getAttribute('data-ntz-target'), el.getAttribute('data-ntz-suffix') || '', 1800);
+        });
+        return;
+      }
+
+      /* Timeline items — individual stagger */
+      var itemDelay = 0;
+      root.querySelectorAll('.ntz-item[data-reveal]').forEach(function (el) {
+        (function (delay) {
+          var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              setTimeout(function () {
+                e.target.classList.add('ntz-visible');
+              }, delay);
+              obs.unobserve(e.target);
+            });
+          }, { threshold: 0.12 });
+          obs.observe(el);
+        })(itemDelay);
+        itemDelay += 120;
+      });
+
+      /* Header + stats block */
+      var blockObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('ntz-visible');
+          blockObs.unobserve(e.target);
+        });
+      }, { threshold: 0.12 });
+
+      root.querySelectorAll('[data-reveal]:not(.ntz-item)').forEach(function (el) {
+        blockObs.observe(el);
+      });
+
+      /* Stats count-up — triggers when the stats grid enters view */
+      var statsEl = root.querySelector('.ntz-stats');
+      if (statsEl) {
+        var countObs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            e.target.querySelectorAll('[data-ntz-target]').forEach(function (el) {
+              var target = parseFloat(el.getAttribute('data-ntz-target'));
+              var suffix = el.getAttribute('data-ntz-suffix') || '';
+              countUp(el, target, suffix, 1800);
+            });
+            countObs.unobserve(e.target);
+          });
+        }, { threshold: 0.35 });
+        countObs.observe(statsEl);
+      }
+    }
+
+    initCountUps();
+    initReveal();
+
+    /* ── Shopify editor reload ── */
+    document.addEventListener('shopify:section:load', function (e) {
+      if (e.detail.sectionId !== '{{ section.id }}') return;
+      root.querySelectorAll('[data-reveal]').forEach(function (el) {
+        el.classList.add('ntz-visible');
+      });
+      root.querySelectorAll('[data-ntz-target]').forEach(function (el) {
+        el.textContent = el.getAttribute('data-ntz-target') + (el.getAttribute('data-ntz-suffix') || '');
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Net Zero 2047",
+  "tag": "section",
+  "class": "net-zero-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "Sustainability"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Supporting India's Journey\nToward Net Zero 2047."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Description",
+      "default": "Buildings account for 40% of global energy consumption. Astberg's energy recovery systems are engineered to fundamentally reduce that footprint — building by building."
+    },
+    {
+      "type": "text",
+      "id": "watermark",
+      "label": "Background watermark text",
+      "default": "2047",
+      "info": "Large decorative text displayed in the background"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "timeline_item",
+      "name": "Timeline item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "year",
+          "label": "Year / period",
+          "default": "2024 — Present"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Energy Recovery Deployment"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "High-efficiency ERV systems recovering up to 96% of heat from exhaust air, dramatically cutting energy loads across buildings."
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Stat number / value",
+          "default": "96%"
+        },
+        {
+          "type": "textarea",
+          "id": "label",
+          "label": "Stat label",
+          "default": "Thermal efficiency in Astberg ERV systems — best-in-class European engineering"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Net Zero 2047",
+      "category": "Content",
+      "blocks": [
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2024 — Present",
+            "title": "Energy Recovery Deployment",
+            "description": "High-efficiency ERV systems recovering up to 96% of heat from exhaust air, dramatically cutting heating and cooling energy loads across commercial and residential buildings."
+          }
+        },
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2025 — 2030",
+            "title": "Green Building Integration",
+            "description": "Partnering with architects and developers to embed Astberg systems into LEED, GRIHA, and IGBC certified green buildings across India's major cities."
+          }
+        },
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2030 — 2040",
+            "title": "Smart City Infrastructure",
+            "description": "Scaling ventilation intelligence to India's smart city initiatives, supporting low-carbon urban infrastructure for millions of building occupants."
+          }
+        },
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2047 — Net Zero Mission",
+            "title": "India's Climate Commitment",
+            "description": "Building-level energy recovery and intelligent air quality systems aligned with India's national commitment to net zero greenhouse gas emissions by 2047."
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "number": "96%",
+            "label": "Thermal efficiency in Astberg ERV systems — best-in-class European engineering"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "number": "50%",
+            "label": "Reduction in HVAC energy consumption versus conventional ventilation"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "number": "40%",
+            "label": "Lower building carbon emissions when Astberg ERV is specified at design stage"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "number": "GRIHA",
+            "label": "& IGBC partner — supporting India's green building certification ecosystem"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

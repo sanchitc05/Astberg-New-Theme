@@ -1,0 +1,1430 @@
+{%- assign sid = section.id -%}
+{%- assign calc_collection = collections[section.settings.calculator_collection] -%}
+
+<style>
+/* ============================================================
+   ASTBERG DUCT FAN CALCULATOR — Modern UI  |  {{ sid }}
+   ============================================================ */
+
+.asc-trigger-{{ sid }} {
+  padding: 3em 20px;
+  text-align: {{ section.settings.button_align | default: 'center' }};
+}
+
+/* ── OPEN BUTTON ─────────────────────────────────────────── */
+.asc-openbtn-{{ sid }} {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 34px;
+  background: linear-gradient(135deg, #0369a1 0%, #0891b2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 15.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 22px rgba(3,105,161,0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: ascPulse{{ sid }} 2.8s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+.asc-openbtn-{{ sid }}::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.2s;
+}
+.asc-openbtn-{{ sid }}:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 36px rgba(3,105,161,0.55);
+  animation: none;
+}
+.asc-openbtn-{{ sid }}:hover::after { background: rgba(255,255,255,0.1); }
+.asc-openbtn-{{ sid }}:active { transform: translateY(0); }
+@keyframes ascPulse{{ sid }} {
+  0%,100% { box-shadow: 0 4px 22px rgba(3,105,161,0.45); }
+  50%      { box-shadow: 0 6px 40px rgba(3,105,161,0.65); }
+}
+
+/* ── OVERLAY ─────────────────────────────────────────────── */
+.asc-overlay-{{ sid }} {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(8,16,32,0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.asc-overlay-{{ sid }}.asc-on {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* ── CARD ────────────────────────────────────────────────── */
+.asc-card-{{ sid }} {
+  background: #fff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 480px;
+  margin: auto;
+  overflow: hidden;
+  box-shadow: 0 32px 100px rgba(0,0,0,0.45);
+  position: relative;
+  font-family: var(--font-primary);
+}
+
+/* ── HEADER ──────────────────────────────────────────────── */
+.asc-hd-{{ sid }} {
+  background: linear-gradient(140deg, #0c4a6e 0%, #0369a1 40%, #0891b2 75%, #06b6d4 100%);
+  padding: 22px 26px 20px;
+}
+.asc-hd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.asc-hd-logo img {
+  height: 28px;
+  width: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+.asc-xbtn {
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s;
+}
+.asc-xbtn:hover { background: rgba(255,255,255,0.32); }
+.asc-hd-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+.asc-hd-sub {
+  color: rgba(255,255,255,0.68);
+  font-size: 12.5px;
+  margin: 0 0 16px;
+}
+.asc-stepdots {
+  display: flex;
+  gap: 6px;
+}
+.asc-stepdot {
+  height: 3px;
+  border-radius: 2px;
+  flex: 1;
+  background: rgba(255,255,255,0.28);
+  transition: background 0.35s;
+}
+.asc-stepdot.asc-on { background: #fff; }
+
+/* ── BODY ────────────────────────────────────────────────── */
+.asc-body-{{ sid }} { padding: 22px 24px 26px; }
+
+.asc-panel { display: block; }
+.asc-panel.asc-hide { display: none; }
+
+/* Label */
+.asc-lbl {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 9px;
+}
+
+/* ── UNIT PILLS ──────────────────────────────────────────── */
+.asc-pills {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.asc-pill {
+  padding: 6px 15px;
+  border-radius: 50px;
+  border: 1.5px solid #e2e8f0;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.asc-pill.asc-on {
+  background: #0369a1;
+  border-color: #0369a1;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(3,105,161,0.32);
+}
+.asc-pill:hover:not(.asc-on) { border-color: #0369a1; color: #0369a1; }
+
+/* ── DIMENSION INPUTS ────────────────────────────────────── */
+.asc-dimlbl {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 9px;
+}
+.asc-dims {
+  display: grid;
+  grid-template-columns: 1fr 16px 1fr 16px 1fr;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+.asc-dimsep {
+  text-align: center;
+  color: #cbd5e1;
+  font-size: 18px;
+  font-weight: 300;
+}
+.asc-field { position: relative; }
+.asc-field-label {
+  position: absolute;
+  top: 8px; left: 0; right: 0;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  z-index: 1;
+}
+.asc-numinput {
+  width: 100%;
+  padding: 22px 6px 7px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f8fafc;
+  font-family: inherit;
+  text-align: center;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+}
+.asc-numinput::-webkit-outer-spin-button,
+.asc-numinput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.asc-numinput::placeholder { color: #94a3b8; }
+.asc-numinput:focus {
+  outline: none;
+  border-color: #0369a1;
+  box-shadow: 0 0 0 3px rgba(3,105,161,0.13);
+  background: #fff;
+}
+
+/* ── ACPH ROW ────────────────────────────────────────────── */
+.asc-acphrow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.asc-acphinput {
+  flex: 1;
+  padding: 13px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+}
+.asc-acphinput::-webkit-outer-spin-button,
+.asc-acphinput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.asc-acphinput:focus {
+  outline: none;
+  border-color: #0369a1;
+  box-shadow: 0 0 0 3px rgba(3,105,161,0.13);
+  background: #fff;
+}
+.asc-roombtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 15px;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.asc-roombtn:hover { background: #e0f2fe; border-color: #0369a1; color: #0369a1; }
+
+/* ── CALCULATE BUTTON ────────────────────────────────────── */
+.asc-calcbtn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #0369a1, #0891b2);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  box-shadow: 0 5px 20px rgba(3,105,161,0.4);
+  transition: opacity 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.asc-calcbtn:hover { opacity: 0.9; }
+.asc-calcbtn:active { transform: scale(0.99); }
+
+.asc-tncrow {
+  display: flex;
+  justify-content: center;
+  margin-top: 11px;
+}
+.asc-tncbtn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 11.5px;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: 0;
+}
+.asc-tncbtn:hover { color: #64748b; }
+
+/* ── RESULTS ─────────────────────────────────────────────── */
+.asc-rboxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.asc-rbox {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid #bae6fd;
+  border-radius: 16px;
+  padding: 16px 14px;
+  text-align: center;
+}
+.asc-rbox-unit {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #0369a1;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 6px;
+}
+.asc-rbox-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0c1a2e;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.asc-rbox-desc {
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* ── PRODUCTS ────────────────────────────────────────────── */
+.asc-prodhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+.asc-prodhead span {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.asc-prodline { flex: 1; height: 1px; background: #e2e8f0; }
+
+.asc-prodgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 18px;
+}
+
+.asc-pcard {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 10px 12px;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+.asc-pcard:hover {
+  border-color: #0369a1;
+  box-shadow: 0 6px 24px rgba(3,105,161,0.16);
+  transform: translateY(-2px);
+}
+.asc-pbadge {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: linear-gradient(135deg, #0369a1, #0891b2);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 50px;
+}
+.asc-pimg {
+  width: 72px; height: 72px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 9px;
+}
+.asc-pimg-ph {
+  width: 72px; height: 72px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 9px;
+  color: #cbd5e1;
+}
+.asc-pname {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+.asc-pshop {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.asc-noprod {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 28px 12px;
+  color: #94a3b8;
+}
+.asc-noprod svg { margin: 0 auto 10px; display: block; }
+.asc-noprod p { font-size: 13px; line-height: 1.6; margin: 0; }
+
+/* RECALCULATE */
+.asc-recalcbtn {
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.asc-recalcbtn:hover { border-color: #0369a1; color: #0369a1; background: #f0f9ff; }
+
+/* ── TAG FILTERS ─────────────────────────────────────────── */
+.asc-tagwrap { margin-bottom: 14px; }
+.asc-tagwrap.asc-hide { display: none; }
+.asc-tagrow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.asc-tagpill {
+  padding: 5px 14px;
+  border-radius: 50px;
+  border: 1.5px solid #e2e8f0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.asc-tagpill.asc-on {
+  background: #0369a1;
+  border-color: #0369a1;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(3,105,161,0.28);
+}
+.asc-tagpill:hover:not(.asc-on) { border-color: #0369a1; color: #0369a1; }
+
+/* ── ROOM SHEET ──────────────────────────────────────────── */
+.asc-sheetbg {
+  position: absolute;
+  inset: 0;
+  background: rgba(8,16,32,0.5);
+  border-radius: 24px;
+  z-index: 15;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.asc-sheetbg.asc-on { opacity: 1; pointer-events: auto; }
+.asc-sheet {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-height: 70%;
+  overflow-y: auto;
+  padding: 14px 18px 26px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+}
+.asc-sheetbg.asc-on .asc-sheet { transform: translateY(0); }
+.asc-handle {
+  width: 36px; height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  margin: 0 auto 14px;
+}
+.asc-sheettitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+  margin: 0 0 14px;
+}
+.asc-roomgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+.asc-rcard {
+  padding: 11px 6px 9px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+  background: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+.asc-rcard:hover, .asc-rcard:active { border-color: #0369a1; background: #f0f9ff; }
+.asc-rcard svg {
+  width: 26px; height: 26px;
+  color: #0369a1;
+  display: block;
+  margin: 0 auto 5px;
+}
+.asc-rcard-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+.asc-rcard-acph {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* ── T&C ─────────────────────────────────────────────────── */
+.asc-tncwrap {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border-radius: 24px;
+  z-index: 20;
+  overflow-y: auto;
+  padding: 22px;
+}
+.asc-tncwrap.asc-on { display: block; }
+.asc-tnctop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.asc-tnctop h3 { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; }
+.asc-iconbtn {
+  background: #f1f5f9;
+  border: none;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  font-size: 15px;
+  padding: 0;
+  transition: background 0.15s;
+}
+.asc-iconbtn:hover { background: #e2e8f0; }
+.asc-tncbody { font-size: 12.5px; line-height: 1.85; color: #475569; }
+.asc-tncbody p { margin: 0 0 10px; }
+.asc-tncbody strong { color: #0f172a; font-weight: 700; }
+.asc-tncbody a { color: #0369a1; }
+
+/* ── FLOATING ACTION BUTTON ──────────────────────────────── */
+.asc-fabwrap-{{ sid }} {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99998;
+  width: 58px;
+  height: 58px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.asc-fabwrap-{{ sid }}.asc-fab-gone { display: none; }
+.asc-fab-{{ sid }} {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0369a1, #0891b2);
+  border: none;
+  color: #fff;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: ascFabBeat{{ sid }} 2.5s ease-in-out infinite;
+  position: relative;
+  padding: 0;
+  box-shadow: 0 4px 22px rgba(3,105,161,0.5);
+}
+@keyframes ascFabBeat{{ sid }} {
+  0%,100% { box-shadow: 0 4px 22px rgba(3,105,161,0.5); }
+  50%      { box-shadow: 0 6px 36px rgba(3,105,161,0.72); }
+}
+.asc-fab-{{ sid }}:hover {
+  transform: scale(1.08);
+  animation: none;
+  box-shadow: 0 8px 32px rgba(3,105,161,0.62);
+}
+.asc-fabwrap-{{ sid }}.asc-fab-dragging .asc-fab-{{ sid }} {
+  cursor: grabbing;
+  transform: scale(1.1);
+  animation: none;
+  box-shadow: 0 12px 40px rgba(3,105,161,0.5);
+}
+.asc-fab-tip-{{ sid }} {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 7px 13px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  font-family: var(--font-primary);
+}
+.asc-fab-tip-{{ sid }}::after {
+  content: '';
+  position: absolute;
+  left: 100%; top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: #0f172a;
+}
+.asc-fab-{{ sid }}:hover .asc-fab-tip-{{ sid }} { opacity: 1; }
+.asc-fab-x-{{ sid }} {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2.5px solid #fff;
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding: 0;
+  transition: background 0.15s, transform 0.15s;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
+.asc-fab-x-{{ sid }}:hover { background: #dc2626; transform: scale(1.2); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .asc-body-{{ sid }} { padding: 18px 16px 22px; }
+  .asc-hd-{{ sid }} { padding: 18px 16px 16px; }
+  .asc-rbox-val { font-size: 23px; }
+  .asc-tncwrap { padding: 18px; }
+}
+</style>
+
+{%- assign tag_blocks = section.blocks | where: "type", "tag" -%}
+
+<!-- Fan data pulled from collection products + metafields (calculator.min_cmh, calculator.max_cmh, calculator.badge, calculator.tags) -->
+<script>
+window.ascFans_{{ sid | replace: '-', '_' }} = [
+  {%- if calc_collection != blank -%}
+    {%- for product in calc_collection.products limit: 250 -%}
+      {
+        name: {{ product.title | json }},
+        image: {% if product.featured_image != blank %}"{{ product.featured_image | image_url: width: 400 }}"{% else %}""{% endif %},
+        url: {{ product.url | json }},
+        minCmh: {{ product.metafields.calculator.min_cmh.value | default: 0 }},
+        maxCmh: {{ product.metafields.calculator.max_cmh.value | default: 200 }},
+        badge: {{ product.metafields.calculator.badge.value | default: '' | json }},
+        tags: {{ product.metafields.calculator.tags.value | default: '' | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  {%- endif -%}
+];
+window.ascTags_{{ sid | replace: '-', '_' }} = [
+  {%- for block in tag_blocks -%}
+    {
+      label: {{ block.settings.label | default: 'Tag' | json }},
+      value: {{ block.settings.value | downcase | json }}
+    }{% unless forloop.last %},{% endunless %}
+  {%- endfor -%}
+];
+</script>
+
+<!-- ── TRIGGER BUTTON ───────────────────────────────────── -->
+{%- if section.settings.show_trigger_btn != false -%}
+<div class="asc-trigger-{{ sid }}">
+  <button class="asc-openbtn-{{ sid }}" id="asc-open-{{ sid }}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+    </svg>
+    {{ section.settings.button_text | default: 'Fan Size Calculator' }}
+  </button>
+</div>
+{%- endif -%}
+
+<!-- ── MAIN OVERLAY ─────────────────────────────────────── -->
+<div class="asc-overlay-{{ sid }}" id="asc-overlay-{{ sid }}" role="dialog" aria-modal="true" aria-label="Duct Fan Size Calculator">
+  <div class="asc-card-{{ sid }}">
+
+    <!-- ROOM TYPE SHEET (slide up) -->
+    <div class="asc-sheetbg" id="asc-sheetbg-{{ sid }}">
+      <div class="asc-sheet">
+        <div class="asc-handle"></div>
+        <p class="asc-sheettitle">Select Your Room Type</p>
+        <div class="asc-roomgrid">
+
+          <div class="asc-rcard" data-acph="1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <div class="asc-rcard-name">Home</div>
+            <div class="asc-rcard-acph">1.5 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 7a2 2 0 00-2 2v10h22V9a2 2 0 00-2-2M3 7V5a2 2 0 012-2h3a2 2 0 012 2v2m6 0V5a2 2 0 012-2h3a2 2 0 012 2v2"/><circle cx="8" cy="13" r="1" fill="currentColor"/></svg>
+            <div class="asc-rcard-name">Bedroom</div>
+            <div class="asc-rcard-acph">1.5 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="2">
+            <svg viewBox="0 0 50 50" fill="currentColor"><path d="M 5 2 A 1.0001 1.0001 0 0 0 4 3 L 4 39 A 1.0001 1.0001 0 0 0 5 40 L 14 40 L 20 40 L 25.425781 40 L 25.111328 41.111328 C 24.641568 42.768247 25.726651 44.494158 27.416016 44.832031 L 27.582031 44.865234 L 27.041016 46.71875 A 1.0001 1.0001 0 1 0 28.958984 47.28125 L 32.414062 35.460938 A 1.0001 1.0001 0 0 0 31.427734 34.167969 A 1.0001 1.0001 0 0 0 30.494141 34.900391 L 28.146484 42.9375 L 27.808594 42.871094 C 27.207958 42.750967 26.878917 42.209284 27.035156 41.658203 L 27.669922 39.421875 A 1.0001 1.0001 0 0 0 27.755859 39.117188 L 28.869141 35.193359 C 29.737784 32.130341 32.584323 30 35.853516 30 L 36 30 L 36.146484 30 C 39.414559 30 42.262216 32.130341 43.130859 35.193359 L 44.964844 41.658203 C 45.121083 42.209284 44.792042 42.750967 44.191406 42.871094 L 43.853516 42.9375 L 41.505859 34.902344 A 1.0001 1.0001 0 0 0 40.542969 34.167969 A 1.0001 1.0001 0 0 0 39.585938 35.462891 L 43.041016 47.28125 A 1.0001 1.0001 0 1 0 44.958984 46.71875 L 44.417969 44.865234 L 44.583984 44.832031 C 46.273349 44.494158 47.358432 42.768247 46.888672 41.111328 L 45.054688 34.646484 C 43.939331 30.713503 40.28641 28 36.146484 28 L 36 28 L 35.853516 28 C 33.662989 28 31.613781 28.764928 30 30.0625 L 30 3 A 1.0001 1.0001 0 0 0 29 2 L 5 2 z M 6 4 L 28 4 L 28 32.300781 C 27.546808 33.018096 27.184828 33.801903 26.945312 34.646484 L 25.994141 38 L 21 38 L 21 33 L 23.478516 33 A 1.0001 1.0001 0 0 0 24.433594 31.703125 L 24.195312 30.939453 L 24.371094 30.904297 C 25.8414 30.614643 26.808185 29.111676 26.392578 27.666016 L 24.898438 22.476562 C 24.1663 19.934446 22.128267 18.036113 19.626953 17.322266 C 20.056802 17.073689 20.434713 16.766564 20.748047 16.414062 C 21.597986 15.457881 22 14.222222 22 13 C 22 11.777778 21.597986 10.542119 20.748047 9.5859375 C 19.898108 8.6297556 18.583333 8 17 8 C 15.416667 8 14.101892 8.6297556 13.251953 9.5859375 C 12.88561 9.998074 12.61765 10.468413 12.414062 10.960938 C 12.201237 10.950774 11.963299 10.947396 11.6875 10.970703 C 10.87689 11.039203 9.86274 11.310356 9.0546875 12.119141 C 7.4393547 13.735937 7.9726562 16.167969 7.9726562 16.167969 A 1.0001 1.0001 0 0 0 8.8183594 17.013672 C 8.8183594 17.013672 11.253036 17.54921 12.869141 15.931641 C 12.875999 15.924776 12.879937 15.91705 12.886719 15.910156 C 13.002533 16.081343 13.112082 16.256708 13.251953 16.414062 C 13.568841 16.770562 13.950772 17.082003 14.386719 17.332031 C 11.904469 18.054903 9.886396 19.94814 9.1582031 22.476562 L 7.6621094 27.666016 C 7.2460692 29.111551 8.2145668 30.614511 9.6855469 30.904297 L 9.8066406 30.927734 L 9.5664062 31.703125 A 1.0001 1.0001 0 0 0 10.521484 33 L 13 33 L 13 38 L 6 38 L 6 4 z M 17 10 C 18.083333 10 18.768559 10.370244 19.251953 10.914062 C 19.735347 11.457882 20 12.222222 20 13 C 20 13.777778 19.735347 14.542119 19.251953 15.085938 C 18.768559 15.629755 18.083333 16 17 16 C 15.916667 16 15.231441 15.629756 14.748047 15.085938 C 14.310364 14.593543 14.062526 13.919002 14.017578 13.21875 C 14.031974 13.008142 14.035284 12.817185 14.029297 12.644531 C 14.097226 11.993925 14.338946 11.374302 14.748047 10.914062 C 15.231441 10.370245 15.916667 10 17 10 z M 11.9375 13.048828 C 11.88944 13.586346 11.773869 14.198498 11.455078 14.517578 C 11.137263 14.835681 10.525187 14.951875 9.9882812 15 C 10.036338 14.462482 10.151912 13.85033 10.470703 13.53125 C 10.789079 13.212586 11.40006 13.096765 11.9375 13.048828 z M 36 17 C 34.416667 17 33.101892 17.629756 32.251953 18.585938 C 31.402014 19.542119 31 20.777778 31 22 C 31 23.222222 31.402014 24.457882 32.251953 25.414062 C 33.101892 26.370244 34.416667 27 36 27 C 37.583333 27 38.898108 26.370244 39.748047 25.414062 C 39.810301 25.344026 39.85269 25.262373 39.910156 25.189453 C 40.033508 25.35781 40.166179 25.523601 40.322266 25.679688 C 42.1892 27.546622 45.097656 26.943359 45.097656 26.943359 A 1.0001 1.0001 0 0 0 45.943359 26.097656 C 45.943359 26.097656 46.546796 23.187421 44.679688 21.320312 C 43.74622 20.386845 42.552223 20.07078 41.591797 19.988281 C 41.204453 19.955009 40.874748 19.964985 40.595703 19.982422 C 40.391493 19.481786 40.119794 19.004153 39.748047 18.585938 C 38.898108 17.629756 37.583333 17 36 17 z M 16.599609 19 L 16.720703 19 L 17.337891 19 L 17.455078 19 C 20.047081 19 22.294393 20.660676 22.976562 23.029297 L 24.470703 28.220703 C 24.563883 28.548385 24.381333 28.863205 23.984375 28.941406 L 23.597656 29.017578 L 21.6875 22.871094 A 1.0001 1.0001 0 0 0 20.712891 22.154297 A 1.0001 1.0001 0 0 0 19.777344 23.462891 L 22.121094 31 L 18.492188 31 L 11.878906 31 L 14.222656 23.462891 A 1.0001 1.0001 0 0 0 13.257812 22.154297 A 1.0001 1.0001 0 0 0 12.3125 22.871094 L 10.404297 29.007812 L 10.072266 28.941406 C 9.6752453 28.863192 9.4919777 28.545214 9.5859375 28.21875 L 9.5839844 28.220703 L 11.080078 23.029297 C 11.762245 20.660629 14.007606 19 16.599609 19 z M 36 19 C 37.083333 19 37.768559 19.370244 38.251953 19.914062 C 38.678183 20.393572 38.921937 21.046117 38.976562 21.726562 C 38.969653 21.887198 38.972028 22.062727 38.978516 22.255859 C 38.926933 22.942687 38.681866 23.602285 38.251953 24.085938 C 37.768559 24.629756 37.083333 25 36 25 C 34.916667 25 34.231441 24.629756 33.748047 24.085938 C 33.264653 23.542119 33 22.777778 33 22 C 33 21.222222 33.264653 20.457882 33.748047 19.914062 C 34.231441 19.370244 34.916667 19 36 19 z M 41.060547 22.060547 C 41.787788 22.086677 42.722689 22.191439 43.265625 22.734375 C 43.808449 23.277199 43.913287 24.211864 43.939453 24.939453 C 43.212212 24.913323 42.279264 24.808561 41.736328 24.265625 C 41.193504 23.722801 41.086713 22.788136 41.060547 22.060547 z M 15 33 L 16 33 L 16 38 L 15 38 L 15 33 z M 18 33 L 18.492188 33 L 19 33 L 19 38 L 18 38 L 18 33 z"/></svg>
+            <div class="asc-rcard-name">Dressing Room</div>
+            <div class="asc-rcard-acph">2 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="10">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 6 6 10 6 13a6 6 0 0012 0c0-3-2-7-6-11z"/></svg>
+            <div class="asc-rcard-name">Powder Toilet</div>
+            <div class="asc-rcard-acph">10 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="12">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M5 12a2 2 0 01-2-2V7h18v3a2 2 0 01-2 2M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7M8 21v-5h8v5"/></svg>
+            <div class="asc-rcard-name">Toilet</div>
+            <div class="asc-rcard-acph">12 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="14">
+            <svg viewBox="0 0 50 50" fill="currentColor"><path d="M 24.923828 3.0292969 A 1.0001 1.0001 0 0 0 24.564453 3.1054688 L 4.5957031 11.376953 A 1.0001 1.0001 0 0 0 4.0546875 12.683594 L 5.5859375 16.378906 A 1.0001 1.0001 0 0 0 6.8925781 16.919922 L 10 15.632812 L 10 45 L 9 45 A 1.0001 1.0001 0 1 0 9 47 L 11 47 L 16 47 L 39 47 L 41 47 A 1.0001 1.0001 0 1 0 41 45 L 40 45 L 40 15.632812 L 43.107422 16.919922 A 1.0001 1.0001 0 0 0 44.414062 16.378906 L 45.945312 12.683594 A 1.0001 1.0001 0 0 0 45.404297 11.376953 L 25.435547 3.1054688 A 1.0001 1.0001 0 0 0 25.023438 3.03125 A 1.0001 1.0001 0 0 0 25.015625 3.03125 A 1.0001 1.0001 0 0 0 24.923828 3.0292969 z M 24.076172 4.5390625 A 1.0001 1.0001 0 0 0 25.923828 4.5390625 L 25.591797 5.3359375 L 43.714844 12.841797 L 42.949219 14.689453 L 39.517578 13.267578 A 1.0001 1.0001 0 0 0 39.234375 13.150391 L 25.382812 7.4140625 A 1.0001 1.0001 0 0 0 24.617188 7.4140625 L 10.773438 13.148438 A 1.0001 1.0001 0 0 0 10.478516 13.269531 L 7.0507812 14.689453 L 6.2851562 12.841797 L 24.408203 5.3359375 L 24.076172 4.5390625 z M 25 9.4199219 L 38 14.804688 L 38 45 L 35 45 L 35 17 A 1.0001 1.0001 0 0 0 34 16 L 16 16 A 1.0001 1.0001 0 0 0 15 17 L 15 29 L 15 34 L 15 45 L 12 45 L 12 14.804688 L 25 9.4199219 z M 17 18 L 33 18 L 33 45 L 17 45 L 17 35 L 19 35 A 1.0001 1.0001 0 0 0 20 34 L 20 29 A 1.0001 1.0001 0 0 0 19 28 L 17 28 L 17 18 z M 23.5 21 C 22.672 21 22 21.671 22 22.5 C 22 24.67 25 25.972656 25 25.972656 C 25 25.972656 28 24.724 28 22.5 C 28 21.671 27.328 21 26.5 21 C 25.693182 21 25.039034 22.109716 25.005859 22.933594 L 25 22.933594 L 24.994141 22.933594 C 24.960966 22.109716 24.306818 21 23.5 21 z M 17 30 L 18 30 L 18 33 L 17 33 L 17 30 z"/></svg>
+            <div class="asc-rcard-name">Public Toilet</div>
+            <div class="asc-rcard-acph">14 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M8 8h8M8 12h5"/></svg>
+            <div class="asc-rcard-name">Office Block</div>
+            <div class="asc-rcard-acph">1.5 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+            <div class="asc-rcard-name">Hostel</div>
+            <div class="asc-rcard-acph">2 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="6">
+            <svg viewBox="0 0 48 48"><path d="M45,24H25H3c-0.553,0-1,0.447-1,1v18c0,1.654,1.346,3,3,3h17c0.868,0,1.967-0.365,2.797-0.98C25.346,45.618,26.126,46,27,46h16c1.654,0,3-1.346,3-3V25C46,24.447,45.553,24,45,24z"/><path fill="#fff" d="M22,43H5c-1.105,0-2-0.895-2-2V23h22v18C25,42.105,23.105,43,22,43z"/><path fill="#fff" d="M43,43H27c-1.105,0-2-0.895-2-2V23h20v18C45,42.105,44.105,43,43,43z"/><path d="M22,44H5c-1.654,0-3-1.346-3-3V23c0-0.553,0.447-1,1-1h22c0.553,0,1,0.447,1,1v18C26,42.804,23.593,44,22,44z M4,24v17c0,0.552,0.448,1,1,1h17c0.82,0,1.956-0.68,2-1.003V24H4z"/><path d="M22.625,13.219l-5-4C17.447,9.077,17.228,9,17,9H9C8.772,9,8.553,9.077,8.375,9.219l-5,4C3.138,13.409,3,13.696,3,14v3c0,0.553,0.447,1,1,1h18c0.553,0,1-0.447,1-1v-3C23,13.696,22.862,13.409,22.625,13.219z"/><path d="M43,44H27c-1.654,0-3-1.346-3-3V23c0-0.553,0.447-1,1-1h20c0.553,0,1,0.447,1,1v18C46,42.654,44.654,44,43,44z M26,24v17c0,0.552,0.448,1,1,1h16c0.552,0,1-0.448,1-1V24H26z"/><polygon fill="#fff" points="4,15 22,15 22,12 17,8 9,8 4,12"/><rect width="8" height="6" x="9" y="2" fill="#fff"/><path d="M22,16H4c-0.553,0-1-0.447-1-1v-3c0-0.304,0.138-0.591,0.375-0.781l5-4C8.553,7.077,8.772,7,9,7h8c0.228,0,0.447,0.077,0.625,0.219l5,4C22.862,11.409,23,11.696,23,12v3C23,15.553,22.553,16,22,16z M5,14h16v-1.52L16.649,9H9.351L5,12.48V14z"/><path d="M17,9H9C8.447,9,8,8.553,8,8V2c0-0.553,0.447-1,1-1h8c0.553,0,1,0.447,1,1v6C18,8.553,17.553,9,17,9z M10,7h6V3h-6V7z"/><polygon points="21,23 5,23 6,21 20,21"/><path d="M21,40H7c-0.553,0-1-0.447-1-1v-8c0-0.553,0.447-1,1-1h14c0.553,0,1,0.447,1,1v8C22,39.553,21.553,40,21,40z M8,38h12v-6H8V38z"/><path d="M45,32H25c-0.553,0-1-0.447-1-1s0.447-1,1-1h20c0.553,0,1,0.447,1,1S45.553,32,45,32z"/><path d="M39,28h-8c-0.553,0-1-0.447-1-1s0.447-1,1-1h8c0.553,0,1,0.447,1,1S39.553,28,39,28z"/><path d="M29,40c-0.553,0-1-0.447-1-1v-4c0-0.553,0.447-1,1-1s1,0.447,1,1v4C30,39.553,29.553,40,29,40z"/><circle cx="8" cy="27" r="1"/><circle cx="12" cy="27" r="1"/><circle cx="16" cy="27" r="1"/><circle cx="20" cy="27" r="1"/></svg>
+            <div class="asc-rcard-name">Kitchen</div>
+            <div class="asc-rcard-acph">6 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <div class="asc-rcard-name">Basement (AC)</div>
+            <div class="asc-rcard-acph">2 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="15" rx="1"/><path d="M3 10h18M7 6V3M17 6V3M12 6V3"/></svg>
+            <div class="asc-rcard-name">Basement (No AC)</div>
+            <div class="asc-rcard-acph">4 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="6">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M 11 2 L 11 4 L 2 4 L 2 6 L 12 6 L 22 6 L 22 4 L 13 4 L 13 2 L 11 2 z M 2 8 L 2 10 L 3 10 C 3.5650302 10 4 10.43497 4 11 L 4 18 C 4 19.64497 5.3550302 21 7 21 L 17 21 C 18.64497 21 20 19.64497 20 18 L 20 11 C 20 10.43497 20.43497 10 21 10 L 22 10 L 22 8 L 2 8 z M 5.8125 10 L 18.1875 10 C 18.07394 10.314892 18 10.648157 18 11 L 18 18 C 18 18.56503 17.56503 19 17 19 L 7 19 C 6.4349698 19 6 18.56503 6 18 L 6 11 C 6 10.648157 5.9260602 10.314892 5.8125 10 z"/></svg>
+            <div class="asc-rcard-name">Pantry</div>
+            <div class="asc-rcard-acph">6 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="2">
+            <svg viewBox="0 0 50 50" fill="currentColor"><path d="M 17.839844 0 C 15.511719 0 13.960938 0.257813 12.960938 0.539063 C 12.460938 0.675781 12.097656 0.820313 11.84375 0.941406 C 11.59375 1.0625 11.398438 1.203125 11.398438 1.203125 L 11.0625 1.453125 L 11.007813 1.875 C 11.007813 1.875 10 9.871094 10 15 C 10 18.085938 11.511719 19.925781 12.863281 21.039063 C 13.542969 21.597656 14.171875 22.015625 14.554688 22.355469 C 14.9375 22.695313 15 22.832031 15 23 C 15 23.941406 14.75 26.726563 14.5 29.816406 C 14.25 32.90625 13.996094 36.367188 14 39 C 14 43.757813 14.332031 46.320313 15.003906 47.917969 C 15.34375 48.714844 15.8125 49.296875 16.390625 49.625 C 16.964844 49.957031 17.550781 50 18 50 C 18.445313 50 19.035156 49.960938 19.609375 49.628906 C 20.1875 49.300781 20.660156 48.714844 20.996094 47.917969 C 21.667969 46.324219 22.003906 43.753906 22 39 C 22 36.371094 21.75 32.90625 21.5 29.816406 C 21.246094 26.726563 21 23.945313 21 23 C 21 22.828125 21.058594 22.703125 21.4375 22.371094 C 21.820313 22.039063 22.453125 21.625 23.128906 21.070313 C 24.488281 19.964844 26 18.121094 26 15 C 26 11.511719 24.996094 1.898438 24.996094 1.898438 L 24.941406 1.402344 L 24.515625 1.144531 C 24.515625 1.144531 23.925781 0.804688 22.859375 0.53125 C 21.792969 0.257813 20.167969 0 17.839844 0 Z M 31.003906 0 C 30.738281 0 30.484375 0.105469 30.292969 0.292969 C 30.105469 0.480469 30 0.734375 30 1 L 30 12 C 30 12.703125 30.097656 20.996094 30.097656 23.152344 C 30.101563 24.074219 29.828125 27.882813 29.550781 31.824219 C 29.277344 35.765625 29 39.910156 29 42 C 29 45.027344 29.089844 46.789063 29.476563 48.027344 C 29.671875 48.644531 29.980469 49.183594 30.46875 49.527344 C 30.957031 49.871094 31.515625 49.953125 32 49.953125 C 32 49.957031 32 49.957031 32 49.953125 C 33.109375 49.953125 34.527344 49.253906 35.460938 47.449219 C 36.394531 45.640625 37 42.769531 37 38 C 37 35.316406 36.464844 33.234375 35.953125 31.605469 C 35.441406 29.972656 35 28.785156 35 28 C 35 26.601563 36.128906 24.578125 37.410156 22.238281 C 38.695313 19.898438 40.070313 17.191406 40.074219 14.078125 C 40.074219 14.074219 40.074219 14.074219 40.074219 14.074219 C 40.074219 12.332031 39.796875 9.683594 38.570313 7.019531 C 37.34375 4.355469 35.128906 1.679688 31.394531 0.0820313 C 31.269531 0.0273438 31.136719 0 31.003906 0 Z M 17.839844 2 C 18.261719 2 18.632813 2.015625 19 2.03125 L 19 12 C 18.996094 12.359375 19.183594 12.695313 19.496094 12.878906 C 19.808594 13.058594 20.191406 13.058594 20.503906 12.878906 C 20.816406 12.695313 21.003906 12.359375 21 12 L 21 2.210938 C 21.539063 2.292969 22.011719 2.378906 22.363281 2.46875 C 22.910156 2.609375 22.90625 2.640625 23.050781 2.707031 C 23.136719 3.550781 24 12.0625 24 15 C 24 17.53125 23.011719 18.589844 21.867188 19.519531 C 21.296875 19.988281 20.679688 20.378906 20.121094 20.867188 C 19.5625 21.355469 19 22.074219 19 23 C 19 24.246094 19.253906 26.898438 19.503906 29.980469 C 19.753906 33.058594 20 36.5 20 39 C 20.003906 43.652344 19.597656 46.085938 19.15625 47.140625 C 18.933594 47.667969 18.746094 47.820313 18.617188 47.894531 C 18.488281 47.96875 18.320313 48 18.003906 48 L 18 48 C 17.683594 48 17.515625 47.96875 17.386719 47.890625 C 17.253906 47.816406 17.070313 47.664063 16.847656 47.140625 C 16.40625 46.085938 16 43.652344 16 39 C 15.996094 36.496094 16.242188 33.058594 16.496094 29.980469 C 16.746094 26.902344 17 24.246094 17 23 C 17 22.070313 16.441406 21.355469 15.886719 20.859375 C 15.328125 20.367188 14.710938 19.96875 14.136719 19.496094 C 12.992188 18.550781 12 17.488281 12 15 C 12 10.421875 12.832031 3.511719 12.933594 2.664063 C 13.082031 2.601563 13.214844 2.542969 13.5 2.460938 C 13.863281 2.359375 14.367188 2.257813 15 2.171875 L 15 12 C 14.996094 12.359375 15.183594 12.695313 15.496094 12.878906 C 15.808594 13.058594 16.191406 13.058594 16.503906 12.878906 C 16.816406 12.695313 17.003906 12.359375 17 12 L 17 2.023438 C 17.277344 2.015625 17.53125 2 17.839844 2 Z M 32 2.859375 C 34.273438 4.234375 35.878906 5.960938 36.75 7.855469 C 37.8125 10.160156 38.074219 12.550781 38.074219 14.078125 C 38.070313 16.589844 36.914063 18.988281 35.65625 21.277344 C 34.402344 23.566406 33 25.691406 33 28 C 33 29.398438 33.558594 30.65625 34.046875 32.203125 C 34.53125 33.75 35 35.578125 35 38 C 35 42.59375 34.371094 45.199219 33.683594 46.53125 C 32.996094 47.859375 32.417969 47.953125 32 47.953125 C 31.726563 47.953125 31.65625 47.914063 31.625 47.894531 C 31.59375 47.875 31.5 47.796875 31.386719 47.425781 C 31.152344 46.6875 31 44.972656 31 42 C 31 40.089844 31.273438 35.898438 31.546875 31.964844 C 31.820313 28.027344 32.101563 24.410156 32.097656 23.148438 C 32.097656 20.9375 32 12.523438 32 12 Z"/></svg>
+            <div class="asc-rcard-name">Restaurants</div>
+            <div class="asc-rcard-acph">2 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            <div class="asc-rcard-name">Workstation</div>
+            <div class="asc-rcard-acph">2 ACPH</div>
+          </div>
+
+          <div class="asc-rcard" data-acph="5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6" stroke-width="2"/><line x1="6" y1="18" x2="6.01" y2="18" stroke-width="2"/></svg>
+            <div class="asc-rcard-name">Server Room</div>
+            <div class="asc-rcard-acph">5 ACPH</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- T&C OVERLAY -->
+    <div class="asc-tncwrap" id="asc-tnc-{{ sid }}">
+      <div class="asc-tnctop">
+        <h3>Terms &amp; Conditions</h3>
+        <button class="asc-iconbtn" id="asc-tnc-close-{{ sid }}" aria-label="Close">✕</button>
+      </div>
+      <div class="asc-tncbody">
+        <p>Welcome to the Duct Fan Size Calculator by <strong>Astberg Ventilation Pvt Ltd.</strong></p>
+        <p><strong>Calculator Purpose:</strong> This tool is for informational purposes only and should not replace professional HVAC advice or system design.</p>
+        <p><strong>Accuracy:</strong> Results are estimates based on standard formulas. Actual requirements may vary. Always verify with a qualified engineer.</p>
+        <p><strong>Liability:</strong> Astberg Ventilation Pvt Ltd. accepts no responsibility for errors or decisions made based on these results. Use at your own risk.</p>
+        <p><strong>Professional Consultation:</strong> For precise sizing, consult a certified HVAC technician or engineer.</p>
+        <p><strong>Usage:</strong> For personal or internal use only. Commercial reproduction requires explicit written authorisation.</p>
+        <p>Contact: <a href="mailto:info@astbergventilation.com">info@astbergventilation.com</a> &nbsp;|&nbsp; <a href="tel:+918288075301">+91 8288075301</a></p>
+        <p style="color:#94a3b8;font-size:11px;">Last Updated: 29-12-2023 — Astberg Ventilation Pvt Ltd.</p>
+      </div>
+    </div>
+
+    <!-- CARD HEADER -->
+    <div class="asc-hd-{{ sid }}">
+      <div class="asc-hd-top">
+        <div class="asc-hd-logo">
+          {%- if section.settings.logo_image != blank -%}
+            <img src="{{ section.settings.logo_image | image_url: width: 200 }}" alt="{{ section.settings.logo_image.alt | default: 'Astberg' }}">
+          {%- else -%}
+            <img src="https://www.astbergventilation.com/images/logo.webp" alt="Astberg Ventilation" onerror="this.style.display='none'">
+          {%- endif -%}
+        </div>
+        <button class="asc-xbtn" id="asc-close-{{ sid }}" aria-label="Close calculator">✕</button>
+      </div>
+      <h2 class="asc-hd-title">{{ section.settings.heading | default: 'Duct Fan Size Calculator' }}</h2>
+      <p class="asc-hd-sub">{{ section.settings.subheading | default: 'Find the perfect ventilation solution for your space' }}</p>
+      <div class="asc-stepdots">
+        <div class="asc-stepdot asc-on" id="asc-dot1-{{ sid }}"></div>
+        <div class="asc-stepdot" id="asc-dot2-{{ sid }}"></div>
+      </div>
+    </div>
+
+    <!-- CARD BODY -->
+    <div class="asc-body-{{ sid }}">
+
+      <!-- STEP 1: INPUTS -->
+      <div class="asc-panel" id="asc-p1-{{ sid }}">
+
+        <span class="asc-lbl">Unit of Measurement</span>
+        <div class="asc-pills" id="asc-pills-{{ sid }}">
+          <button class="asc-pill asc-on" data-unit="feet">Feet</button>
+          <button class="asc-pill" data-unit="meter">Meter</button>
+          <button class="asc-pill" data-unit="centimeter">Cm</button>
+          <button class="asc-pill" data-unit="inches">Inch</button>
+          <button class="asc-pill" data-unit="mm">Mm</button>
+        </div>
+
+        <span class="asc-dimlbl" id="asc-dimlbl-{{ sid }}">Room Dimensions (feet)</span>
+        <div class="asc-dims">
+          <div class="asc-field">
+            <div class="asc-field-label">L</div>
+            <input class="asc-numinput" id="asc-l-{{ sid }}" type="number" min="0" step="0.1" placeholder="0">
+          </div>
+          <span class="asc-dimsep">×</span>
+          <div class="asc-field">
+            <div class="asc-field-label">W</div>
+            <input class="asc-numinput" id="asc-w-{{ sid }}" type="number" min="0" step="0.1" placeholder="0">
+          </div>
+          <span class="asc-dimsep">×</span>
+          <div class="asc-field">
+            <div class="asc-field-label">H</div>
+            <input class="asc-numinput" id="asc-h-{{ sid }}" type="number" min="0" step="0.1" placeholder="0">
+          </div>
+        </div>
+
+        <span class="asc-lbl">Air Changes Per Hour (ACPH)</span>
+        <div class="asc-acphrow">
+          <input class="asc-acphinput" id="asc-acph-{{ sid }}" type="number" min="0" step="0.1" placeholder="Type or pick room type →">
+          <button class="asc-roombtn" id="asc-room-open-{{ sid }}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Room Type
+          </button>
+        </div>
+
+        <button class="asc-calcbtn" id="asc-calcbtn-{{ sid }}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V9a2 2 0 00-2-2h-2M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M9 7h6M12 11v6M9 14h6"/></svg>
+          Calculate CMH &amp; CFM
+        </button>
+
+        <div class="asc-tncrow">
+          <button class="asc-tncbtn" id="asc-tnc-open-{{ sid }}">Terms &amp; Conditions</button>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: RESULTS -->
+      <div class="asc-panel asc-hide" id="asc-p2-{{ sid }}">
+
+        <div class="asc-rboxes">
+          <div class="asc-rbox">
+            <div class="asc-rbox-unit">CMH</div>
+            <div class="asc-rbox-val" id="asc-cmh-{{ sid }}">—</div>
+            <div class="asc-rbox-desc">m³ per hour</div>
+          </div>
+          <div class="asc-rbox">
+            <div class="asc-rbox-unit">CFM</div>
+            <div class="asc-rbox-val" id="asc-cfm-{{ sid }}">—</div>
+            <div class="asc-rbox-desc">ft³ per minute</div>
+          </div>
+        </div>
+
+        <div class="asc-prodhead">
+          <span>Recommended Products</span>
+          <div class="asc-prodline"></div>
+        </div>
+
+        <div class="asc-tagwrap asc-hide" id="asc-tagwrap-{{ sid }}">
+          <div class="asc-tagrow" id="asc-tagrow-{{ sid }}"></div>
+        </div>
+
+        <div class="asc-prodgrid" id="asc-prodgrid-{{ sid }}"></div>
+
+        <button class="asc-recalcbtn" id="asc-recalc-{{ sid }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Recalculate
+        </button>
+
+      </div>
+
+    </div><!-- /body -->
+  </div><!-- /card -->
+</div><!-- /overlay -->
+
+{%- if section.settings.show_fab != false -%}
+<!-- ── FLOATING ACTION BUTTON ────────────────────────────── -->
+<div class="asc-fabwrap-{{ sid }}" id="asc-fabwrap-{{ sid }}">
+  <button class="asc-fab-{{ sid }}" id="asc-fab-{{ sid }}" aria-label="{{ section.settings.fab_label | default: 'Fan Size Calculator' }}">
+    <span class="asc-fab-tip-{{ sid }}">{{ section.settings.fab_label | default: 'Fan Calculator' }}</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+    </svg>
+    <span class="asc-fab-x-{{ sid }}" id="asc-fab-x-{{ sid }}" role="button" aria-label="Hide calculator button" tabindex="0">✕</span>
+  </button>
+</div>
+{%- endif -%}
+
+<script>
+(function () {
+  'use strict';
+
+  var SID       = '{{ sid }}';
+  var KEY       = SID.replace(/-/g,'_');
+  var FANS      = window['ascFans_' + KEY] || [];
+  var TAGS      = window['ascTags_' + KEY] || [];
+  /* Share fan data with the global FAB on every page via localStorage */
+  try {
+    if (FANS.length) localStorage.setItem('ascg-fans', JSON.stringify(FANS));
+    if (TAGS.length) localStorage.setItem('ascg-tags', JSON.stringify(TAGS));
+  } catch(e) {}
+
+  var UNIT_TO_FEET = { feet:1, meter:3.28084, centimeter:0.0328084, inches:0.0833333, mm:0.00328084 };
+  var UNIT_NAME    = { feet:'feet', meter:'meters', centimeter:'centimeters', inches:'inches', mm:'millimeters' };
+
+  function el(id) { return document.getElementById(id + '-' + SID); }
+
+  var overlay   = el('asc-overlay');
+  var openBtn   = el('asc-open');
+  var closeBtn  = el('asc-close');
+  var sheetBg   = el('asc-sheetbg');
+  var roomOpen  = el('asc-room-open');
+  var tncWrap   = el('asc-tnc');
+  var tncOpen   = el('asc-tnc-open');
+  var tncClose  = el('asc-tnc-close');
+  var p1        = el('asc-p1');
+  var p2        = el('asc-p2');
+  var dot1      = el('asc-dot1');
+  var dot2      = el('asc-dot2');
+  var dimLbl    = el('asc-dimlbl');
+  var cmhEl     = el('asc-cmh');
+  var cfmEl     = el('asc-cfm');
+  var prodGrid  = el('asc-prodgrid');
+  var tagWrap   = el('asc-tagwrap');
+  var tagRow    = el('asc-tagrow');
+  var pillsWrap = el('asc-pills');
+  var calcBtn   = el('asc-calcbtn');
+  var recalcBtn = el('asc-recalc');
+
+  var activeUnit = 'feet';
+  var currentMatchedFans = [];
+  var activeTag = 'all';
+
+  /* ── open / close ── */
+  if (openBtn) {
+    openBtn.addEventListener('click', function () {
+      overlay.classList.add('asc-on');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+  function closeAll() {
+    overlay.classList.remove('asc-on');
+    document.body.style.overflow = '';
+  }
+  closeBtn.addEventListener('click', closeAll);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeAll(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (sheetBg.classList.contains('asc-on')) { sheetBg.classList.remove('asc-on'); }
+    else if (tncWrap.classList.contains('asc-on')) { tncWrap.classList.remove('asc-on'); }
+    else { closeAll(); }
+  });
+
+  /* ── unit pills ── */
+  pillsWrap.querySelectorAll('.asc-pill').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      pillsWrap.querySelectorAll('.asc-pill').forEach(function (p) { p.classList.remove('asc-on'); });
+      pill.classList.add('asc-on');
+      activeUnit = pill.dataset.unit;
+      dimLbl.textContent = 'Room Dimensions (' + UNIT_NAME[activeUnit] + ')';
+    });
+  });
+
+  /* ── room sheet ── */
+  roomOpen.addEventListener('click', function () { sheetBg.classList.add('asc-on'); });
+  sheetBg.addEventListener('click', function (e) { if (e.target === sheetBg) sheetBg.classList.remove('asc-on'); });
+  sheetBg.querySelectorAll('.asc-rcard').forEach(function (card) {
+    card.addEventListener('click', function () {
+      el('asc-acph').value = card.dataset.acph;
+      sheetBg.classList.remove('asc-on');
+    });
+  });
+
+  /* ── T&C ── */
+  tncOpen.addEventListener('click', function () { tncWrap.classList.add('asc-on'); });
+  tncClose.addEventListener('click', function () { tncWrap.classList.remove('asc-on'); });
+
+  /* ── calculate ── */
+  calcBtn.addEventListener('click', function () {
+    var l  = parseFloat(el('asc-l').value);
+    var w  = parseFloat(el('asc-w').value);
+    var h  = parseFloat(el('asc-h').value);
+    var ac = parseFloat(el('asc-acph').value);
+
+    if ([l, w, h, ac].some(function (v) { return isNaN(v) || v <= 0; })) {
+      alert('Please fill in all four fields with valid positive numbers.');
+      return;
+    }
+
+    var f   = UNIT_TO_FEET[activeUnit] || 1;
+    var cfm = (l * f) * (w * f) * (h * f) * ac / 60;
+    var cmh = cfm * 1.7;
+
+    p1.classList.add('asc-hide');
+    p2.classList.remove('asc-hide');
+    dot1.classList.remove('asc-on');
+    dot2.classList.add('asc-on');
+    overlay.scrollTop = 0;
+
+    countUp(cmhEl, cmh, 650);
+    countUp(cfmEl, cfm, 650);
+    renderProducts(cmh);
+  });
+
+  /* ── recalculate ── */
+  recalcBtn.addEventListener('click', function () {
+    p2.classList.add('asc-hide');
+    p1.classList.remove('asc-hide');
+    dot2.classList.remove('asc-on');
+    dot1.classList.add('asc-on');
+  });
+
+  /* ── count-up animation ── */
+  function countUp(target, end, duration) {
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      target.textContent = (eased * end).toFixed(2);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── parse tags helper ── */
+  function parseTags(raw) {
+    return (raw || '').split(',').map(function (t) { return t.trim().toLowerCase(); }).filter(Boolean);
+  }
+
+  /* ── render products (entry point) ── */
+  function renderProducts(cmh) {
+    currentMatchedFans = FANS.filter(function (f) { return cmh >= f.minCmh && cmh <= f.maxCmh; });
+    activeTag = 'all';
+    renderTagFilters();
+    renderProductGrid();
+  }
+
+  /* ── render tag filter pills ── */
+  function renderTagFilters() {
+    var usedValues = {};
+    currentMatchedFans.forEach(function (f) {
+      parseTags(f.tags).forEach(function (t) { usedValues[t] = true; });
+    });
+
+    var presentTags = TAGS.filter(function (t) { return usedValues[t.value]; });
+
+    if (!presentTags.length) {
+      tagWrap.classList.add('asc-hide');
+      return;
+    }
+    tagWrap.classList.remove('asc-hide');
+
+    tagRow.innerHTML = '<button class="asc-tagpill' + (activeTag === 'all' ? ' asc-on' : '') + '" data-tag="all">All</button>'
+      + presentTags.map(function (t) {
+          return '<button class="asc-tagpill' + (activeTag === t.value ? ' asc-on' : '') + '" data-tag="' + t.value + '">' + escHtml(t.label) + '</button>';
+        }).join('');
+
+    tagRow.querySelectorAll('.asc-tagpill').forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        activeTag = pill.dataset.tag;
+        renderTagFilters();
+        renderProductGrid();
+      });
+    });
+  }
+
+  /* ── render product grid (respects activeTag) ── */
+  function renderProductGrid() {
+    var toShow = activeTag === 'all'
+      ? currentMatchedFans
+      : currentMatchedFans.filter(function (f) { return parseTags(f.tags).indexOf(activeTag) !== -1; });
+
+    if (!toShow.length && currentMatchedFans.length) {
+      prodGrid.innerHTML = '<div class="asc-noprod">'
+        + '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        + '<p>No products found for this filter.</p>'
+        + '</div>';
+      return;
+    }
+
+    if (!toShow.length) {
+      prodGrid.innerHTML = '<div class="asc-noprod">'
+        + '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        + '<p>No products match this CMH range.<br>Add fan products in the theme editor and set their CMH range.</p>'
+        + '</div>';
+      return;
+    }
+
+    prodGrid.innerHTML = toShow.map(function (fan) {
+      var badge = fan.badge ? '<span class="asc-pbadge">' + fan.badge + '</span>' : '';
+      var img = fan.image
+        ? '<img class="asc-pimg" src="' + fan.image + '" alt="' + escHtml(fan.name) + '" loading="lazy">'
+        : '<div class="asc-pimg-ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+      var cta = fan.url ? '<span class="asc-pshop">Shop Now <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>' : '';
+      var tag = fan.url ? 'a' : 'div';
+      var attr = fan.url ? 'href="' + fan.url + '" target="_blank" rel="noopener noreferrer"' : '';
+      return '<' + tag + ' class="asc-pcard" ' + attr + '>'
+        + badge + img
+        + '<div class="asc-pname">' + escHtml(fan.name) + '</div>'
+        + cta + '</' + tag + '>';
+    }).join('');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── floating action button ───────────────────────────── */
+  var fabWrap = document.getElementById('asc-fabwrap-' + SID);
+  if (fabWrap) {
+    var fabBtn   = document.getElementById('asc-fab-' + SID);
+    var fabXBtn  = document.getElementById('asc-fab-x-' + SID);
+
+    var fabOffX = 0, fabOffY = 0;
+    var fabDragSX, fabDragSY, fabDragSOX, fabDragSOY;
+    var fabDragging = false;
+    var fabDidMove  = false;
+
+    function fabClient(e) { return e.touches ? e.touches[0] : e; }
+
+    fabWrap.addEventListener('mousedown',  fabDown);
+    fabWrap.addEventListener('touchstart', fabDown, { passive: false });
+
+    function fabDown(e) {
+      if (e.target === fabXBtn || fabXBtn.contains(e.target)) return;
+      fabDragging = true;
+      fabDidMove  = false;
+      var c = fabClient(e);
+      fabDragSX  = c.clientX;
+      fabDragSY  = c.clientY;
+      fabDragSOX = fabOffX;
+      fabDragSOY = fabOffY;
+      fabWrap.classList.add('asc-fab-dragging');
+      e.preventDefault();
+    }
+
+    document.addEventListener('mousemove',  fabMove);
+    document.addEventListener('touchmove',  fabMove, { passive: false });
+
+    function fabMove(e) {
+      if (!fabDragging) return;
+      var c  = fabClient(e);
+      var dx = c.clientX - fabDragSX;
+      var dy = c.clientY - fabDragSY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) fabDidMove = true;
+      fabOffX = fabDragSOX + dx;
+      fabOffY = fabDragSOY + dy;
+      fabWrap.style.transform = 'translate(' + fabOffX + 'px, ' + fabOffY + 'px)';
+      e.preventDefault();
+    }
+
+    document.addEventListener('mouseup',  fabUp);
+    document.addEventListener('touchend', fabUp);
+
+    function fabUp() {
+      if (!fabDragging) return;
+      fabDragging = false;
+      fabWrap.classList.remove('asc-fab-dragging');
+    }
+
+    function openFromFab() {
+      overlay.classList.add('asc-on');
+      document.body.style.overflow = 'hidden';
+    }
+    fabBtn.addEventListener('click', function () {
+      if (fabDidMove) { fabDidMove = false; return; }
+      openFromFab();
+    });
+    /* touchstart preventDefault (needed for drag) cancels the click event on mobile.
+       Handle tap via touchend instead. */
+    fabBtn.addEventListener('touchend', function (e) {
+      if (fabDidMove) { fabDidMove = false; return; }
+      if (e.target === fabXBtn || fabXBtn.contains(e.target)) return;
+      e.preventDefault();
+      openFromFab();
+    });
+
+    fabXBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      fabWrap.classList.add('asc-fab-gone');
+    });
+    fabXBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fabXBtn.click(); }
+    });
+  }
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Duct Fan Calculator",
+  "blocks": [
+    {
+      "type": "tag",
+      "name": "Tag Filter",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Tag Label",
+          "info": "Displayed on the filter pill, e.g. Kitchen Solution",
+          "default": "Kitchen Solution"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Tag Value",
+          "info": "Lowercase, no spaces — must match what you type in fan Tags fields, e.g. kitchen",
+          "default": "kitchen"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Fan Products Source"
+    },
+    {
+      "type": "collection",
+      "id": "calculator_collection",
+      "label": "Calculator Collection",
+      "info": "Pick the collection that holds your fan products. Each product needs 4 metafields — namespace: calculator, keys: min_cmh (integer), max_cmh (integer), badge (text), tags (text, comma-separated)."
+    },
+    {
+      "type": "header",
+      "content": "Trigger Button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trigger_btn",
+      "label": "Show Trigger Button",
+      "info": "Uncheck to hide the on-page button and rely on the floating button only",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Fan Size Calculator"
+    },
+    {
+      "type": "select",
+      "id": "button_align",
+      "label": "Button Alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Calculator Text"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Duct Fan Size Calculator"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Find the perfect ventilation solution for your space"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo Image",
+      "info": "Optional — uses Astberg logo by default"
+    },
+    {
+      "type": "header",
+      "content": "Floating Button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_fab",
+      "label": "Show Floating Button",
+      "info": "A draggable calculator button fixed to the bottom-right of the page",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "fab_label",
+      "label": "Floating Button Tooltip",
+      "default": "Fan Calculator"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Duct Fan Calculator"
+    }
+  ]
+}
+{% endschema %}

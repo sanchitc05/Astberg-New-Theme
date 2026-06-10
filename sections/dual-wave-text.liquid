@@ -1,0 +1,479 @@
+{%- assign wrapper_id = 'dw-' | append: section.id -%}
+{%- assign wave_num = section.settings.wave_number -%}
+{%- assign wave_spd = section.settings.wave_speed -%}
+
+<style>
+  #{{ wrapper_id }} {
+    background-color: {{ section.settings.bg_color }};
+    overflow: hidden;
+  }
+  #{{ wrapper_id }} .dw-spacer-top    { height: {{ section.settings.spacer_top }}vh; }
+  #{{ wrapper_id }} .dw-spacer-bottom { height: {{ section.settings.spacer_bottom }}vh; }
+
+  #{{ wrapper_id }} .dw-wrapper {
+    display: flex;
+    width: 100%;
+    position: relative;
+    gap: 25vw;
+    padding: 0 1.5rem;
+    overflow: hidden;
+  }
+
+  #{{ wrapper_id }} .dw-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    font-size: {{ section.settings.font_size }};
+    font-weight: {{ section.settings.font_weight }};
+    line-height: 0.7;
+    position: relative;
+    z-index: 100;
+  }
+
+  #{{ wrapper_id }} .dw-col-left  { align-items: flex-start; }
+  #{{ wrapper_id }} .dw-col-right { align-items: flex-end; }
+
+  #{{ wrapper_id }} .dw-text {
+    width: max-content;
+    color: {{ section.settings.text_color }};
+    text-transform: uppercase;
+    transition: color 300ms ease-out;
+    cursor: default;
+    white-space: nowrap;
+  }
+
+  #{{ wrapper_id }} .dw-text.focused {
+    color: {{ section.settings.focused_color }};
+    z-index: 2;
+  }
+
+  #{{ wrapper_id }} .dw-thumb-wrap {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 15vw;
+    height: auto;
+    z-index: 1;
+    pointer-events: none;
+    display: grid;
+    place-items: center;
+  }
+
+  #{{ wrapper_id }} .dw-thumb {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 30vh;
+    display: block;
+  }
+
+  #{{ wrapper_id }} .dw-thumb[src=""] {
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    #{{ wrapper_id }} .dw-wrapper {
+      gap: 5vw;
+    }
+    #{{ wrapper_id }} .dw-col {
+      gap: 2rem;
+      font-size: 4.5vw;
+    }
+    #{{ wrapper_id }} .dw-thumb-wrap {
+      width: 40vw;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #{{ wrapper_id }} .dw-wrapper {
+      gap: 2vw;
+      padding: 0 1rem;
+    }
+    #{{ wrapper_id }} .dw-col {
+      font-size: 3.8vw;
+      gap: 1.5rem;
+    }
+    #{{ wrapper_id }} .dw-thumb-wrap {
+      width: 30vw;
+    }
+  }
+</style>
+
+<div id="{{ wrapper_id }}">
+  <div class="dw-spacer-top"></div>
+
+  <div
+    class="dw-wrapper"
+    data-wave-number="{{ wave_num }}"
+    data-wave-speed="{{ wave_spd }}"
+  >
+    <!-- Left column -->
+    <div class="dw-col dw-col-left">
+      {%- for block in section.blocks -%}
+        {%- assign img_url = '' -%}
+        {%- if block.settings.image != blank -%}
+          {%- assign img_url = block.settings.image | img_url: '400x' -%}
+        {%- endif -%}
+        <div
+          class="dw-text"
+          data-image="{{ img_url }}"
+          {{ block.shopify_attributes }}
+        >{{ block.settings.left_text | escape }}</div>
+      {%- endfor -%}
+    </div>
+
+    <!-- Centre thumbnail -->
+    <div class="dw-thumb-wrap">
+      {%- assign first_img = '' -%}
+      {%- for block in section.blocks -%}
+        {%- if block.settings.image != blank and first_img == '' -%}
+          {%- assign first_img = block.settings.image | img_url: '400x' -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <img
+        class="dw-thumb"
+        src="{{ first_img }}"
+        alt=""
+        width="400"
+        height="400"
+        loading="eager"
+      />
+    </div>
+
+    <!-- Right column -->
+    <div class="dw-col dw-col-right">
+      {%- for block in section.blocks -%}
+        <div
+          class="dw-text"
+          {{ block.shopify_attributes }}
+        >{{ block.settings.right_text | escape }}</div>
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <div class="dw-spacer-bottom"></div>
+</div>
+
+<script>
+(function () {
+  var wrapperId = {{ wrapper_id | json }};
+  var sectionId = {{ section.id | json }};
+
+  /* ── State kept outside run() so cleanup can always reach it ── */
+  var scrollHandlerRef = null;
+  var resizeHandlerRef = null;
+  var prevLeftTexts    = null;
+  var prevRightTexts   = null;
+
+  function cleanup() {
+    if (scrollHandlerRef) { window.removeEventListener('scroll', scrollHandlerRef); scrollHandlerRef = null; }
+    if (resizeHandlerRef) { window.removeEventListener('resize', resizeHandlerRef); resizeHandlerRef = null; }
+    if (prevLeftTexts)    { gsap.killTweensOf(prevLeftTexts);  prevLeftTexts  = null; }
+    if (prevRightTexts)   { gsap.killTweensOf(prevRightTexts); prevRightTexts = null; }
+  }
+
+  function run() {
+    if (typeof gsap === 'undefined') return;
+    cleanup();
+
+    var sectionEl = document.getElementById(wrapperId);
+    if (!sectionEl) return;
+
+    var wrapper    = sectionEl.querySelector('.dw-wrapper');
+    var leftCol    = sectionEl.querySelector('.dw-col-left');
+    var rightCol   = sectionEl.querySelector('.dw-col-right');
+    var thumbnail  = sectionEl.querySelector('.dw-thumb');
+    var leftTexts  = gsap.utils.toArray(leftCol.querySelectorAll('.dw-text'));
+    var rightTexts = gsap.utils.toArray(rightCol.querySelectorAll('.dw-text'));
+
+    if (!leftTexts.length || !rightTexts.length) return;
+
+    var waveNumber   = parseFloat(wrapper.dataset.waveNumber) || 12;
+    var waveSpeed    = parseFloat(wrapper.dataset.waveSpeed)  || 1;
+    var currentImage = null;
+    var leftSetters, rightSetters, leftRange, rightRange;
+
+    function calculateRanges() {
+      var maxL  = Math.max.apply(null, leftTexts.map(function(t)  { return t.offsetWidth; }));
+      var maxR  = Math.max.apply(null, rightTexts.map(function(t) { return t.offsetWidth; }));
+      leftRange  = { minX: 0, maxX: Math.max(0, leftCol.offsetWidth  - maxL) };
+      rightRange = { minX: 0, maxX: Math.max(0, rightCol.offsetWidth - maxR) };
+    }
+
+    function calculateWavePosition(index, progress, minX, range) {
+      var phase = waveNumber * index + waveSpeed * progress * Math.PI * 2 - Math.PI / 2;
+      return minX + ((Math.sin(phase) + 1) / 2) * range;
+    }
+
+    function getScrollProgress() {
+      var rect  = wrapper.getBoundingClientRect();
+      var total = window.innerHeight + rect.height;
+      if (total <= 0) return 0;
+      return Math.max(0, Math.min(1, (window.innerHeight - rect.top) / total));
+    }
+
+    function findClosestToViewportCenter() {
+      var center = window.innerHeight / 2;
+      var closest = 0, minDist = Infinity;
+      leftTexts.forEach(function(text, i) {
+        var rect = text.getBoundingClientRect();
+        var dist = Math.abs(rect.top + rect.height / 2 - center);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      return closest;
+    }
+
+    function updateColumn(texts, setters, range, progress, focusedIndex, multiplier) {
+      var size = range.maxX - range.minX;
+      texts.forEach(function(text, i) {
+        setters[i](calculateWavePosition(i, progress, range.minX, size) * multiplier);
+        if (i === focusedIndex) text.classList.add('focused');
+        else text.classList.remove('focused');
+      });
+    }
+
+    function updateThumbnail(focusedText) {
+      if (!thumbnail || !focusedText) return;
+      var newImage = focusedText.dataset.image;
+      if (newImage && newImage !== currentImage) { currentImage = newImage; thumbnail.src = newImage; }
+      var rect   = wrapper.getBoundingClientRect();
+      var thumbH = thumbnail.offsetHeight;
+      var idealY = window.innerHeight / 2 - rect.top - thumbH / 2;
+      gsap.set(thumbnail, { y: Math.max(-thumbH / 2, Math.min(rect.height - thumbH / 2, idealY)) });
+    }
+
+    function update() {
+      var progress     = getScrollProgress();
+      var focusedIndex = findClosestToViewportCenter();
+      updateColumn(leftTexts,  leftSetters,  leftRange,  progress, focusedIndex,  1);
+      updateColumn(rightTexts, rightSetters, rightRange, progress, focusedIndex, -1);
+      updateThumbnail(leftTexts[focusedIndex]);
+    }
+
+    function init() {
+      if (leftCol.offsetWidth === 0) { requestAnimationFrame(init); return; }
+
+      calculateRanges();
+      leftSetters  = leftTexts.map(function(t) { return gsap.quickTo(t, 'x', { duration: 0.6, ease: 'power4.out' }); });
+      rightSetters = rightTexts.map(function(t) { return gsap.quickTo(t, 'x', { duration: 0.6, ease: 'power4.out' }); });
+
+      prevLeftTexts  = leftTexts;
+      prevRightTexts = rightTexts;
+
+      /* Fire once immediately to set correct positions at current scroll */
+      update();
+
+      /* Only recalculate on actual scroll — no rAF polling */
+      scrollHandlerRef = update;
+      window.addEventListener('scroll', scrollHandlerRef, { passive: true });
+
+      /* On resize: recalculate column widths then reposition */
+      resizeHandlerRef = function() {
+        calculateRanges();
+        update();
+      };
+      window.addEventListener('resize', resizeHandlerRef, { passive: true });
+    }
+
+    /* Preload images then init */
+    var imageCache = {};
+    var sources = [];
+    leftTexts.forEach(function(t) {
+      var src = t.dataset.image;
+      if (src && !imageCache[src]) { imageCache[src] = true; sources.push(src); }
+    });
+    if (thumbnail && thumbnail.getAttribute('src')) {
+      var ts = thumbnail.getAttribute('src');
+      if (!imageCache[ts]) { imageCache[ts] = true; sources.push(ts); }
+    }
+
+    if (sources.length === 0) { init(); return; }
+
+    var loaded = 0;
+    sources.forEach(function(src) {
+      var img = new Image();
+      img.onload = img.onerror = function() {
+        loaded++;
+        if (loaded === sources.length) init();
+      };
+      img.src = src;
+    });
+  }
+
+  /* ── Boot — wait for window.load so GSAP + theme.js are ready ── */
+  if (document.readyState === 'complete') {
+    run();
+  } else {
+    window.addEventListener('load', run);
+  }
+
+  /* ── Theme editor: re-init on save, cleanup on remove ─────────── */
+  document.addEventListener('shopify:section:load', function(e) {
+    var isThis = (e.detail && e.detail.sectionId === sectionId)
+              || (e.target && e.target.querySelector && e.target.querySelector('#' + wrapperId));
+    if (!isThis) return;
+    /* Double rAF: first frame signals repaint started, second ensures
+       layout is fully computed before we read offsetWidth. */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(run);
+    });
+  });
+
+  document.addEventListener('shopify:section:unload', function(e) {
+    var isThis = (e.detail && e.detail.sectionId === sectionId)
+              || (e.target && e.target.querySelector && e.target.querySelector('#' + wrapperId));
+    if (isThis) cleanup();
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Dual Wave Text",
+  "tag": "section",
+  "class": "dual-wave-text-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Wave settings"
+    },
+    {
+      "type": "range",
+      "id": "wave_number",
+      "label": "Wave density",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 12,
+      "info": "Controls how many wave cycles appear across the items"
+    },
+    {
+      "type": "range",
+      "id": "wave_speed",
+      "label": "Wave speed",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "info": "How fast the wave shifts as you scroll"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "spacer_top",
+      "label": "Top spacer (vh)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "spacer_bottom",
+      "label": "Bottom spacer (vh)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 75
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Font size",
+      "options": [
+        { "value": "clamp(1.5rem, 7vw, 2.5rem)", "label": "Small" },
+        { "value": "clamp(2rem, 10vw, 3rem)",    "label": "Medium (default)" },
+        { "value": "clamp(2.5rem, 12vw, 4rem)",  "label": "Large" },
+        { "value": "clamp(3rem, 15vw, 5.5rem)",  "label": "X-Large" }
+      ],
+      "default": "clamp(2rem, 10vw, 3rem)"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular (default)" },
+        { "value": "500", "label": "Medium" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text (unfocused)",
+      "default": "#4d4d4d"
+    },
+    {
+      "type": "color",
+      "id": "focused_color",
+      "label": "Text (focused)",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "List item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "left_text",
+          "label": "Left column text",
+          "default": "Product Name"
+        },
+        {
+          "type": "text",
+          "id": "right_text",
+          "label": "Right column text",
+          "default": "Brand Name"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Thumbnail image",
+          "info": "Shown in the centre when this item is focused"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dual Wave Text",
+      "blocks": [
+        { "type": "item", "settings": { "left_text": "Airflow",         "right_text": "Net Zero" } },
+        { "type": "item", "settings": { "left_text": "Thermal",         "right_text": "Aether" } },
+        { "type": "item", "settings": { "left_text": "Climate",         "right_text": "Future Air" } },
+        { "type": "item", "settings": { "left_text": "Filtration",      "right_text": "Pureflow" } },
+        { "type": "item", "settings": { "left_text": "Pressure",        "right_text": "Nexus" } },
+        { "type": "item", "settings": { "left_text": "Ventilation",     "right_text": "Smart Climate" } },
+        { "type": "item", "settings": { "left_text": "Energy Recovery", "right_text": "Zero Emission" } },
+        { "type": "item", "settings": { "left_text": "Air Quality",     "right_text": "Ecoflow" } },
+        { "type": "item", "settings": { "left_text": "Circulation",     "right_text": "Stratos" } },
+        { "type": "item", "settings": { "left_text": "HVAC Systems",    "right_text": "Next Gen" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,986 @@
+{%- assign sect_id = 'dg-' | append: section.id -%}
+
+<style>
+  #{{ sect_id }} {
+    height: {{ section.settings.scroll_height }}vh;
+    position: relative;
+  }
+
+  #{{ sect_id }} .dg-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: #000;
+  }
+
+  #{{ sect_id }} .dg-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: pan-y;
+  }
+
+  #{{ sect_id }} .dg-label {
+    position: absolute;
+    inset: 0;
+    z-index: 80;
+    pointer-events: none;
+    transition: opacity 260ms ease;
+    color: rgba(244, 244, 244, 0.92);
+    opacity: 0;
+  }
+
+  #{{ sect_id }} .dg-label-left {
+    position: absolute;
+    left: clamp(2.5rem, 8vw, 12rem);
+    top: 50%;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  #{{ sect_id }} .dg-label-index {
+    margin: 0;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  #{{ sect_id }} .dg-label-word {
+    margin: 0;
+    font-size: clamp(9px, 0.78vw, 11px);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  #{{ sect_id }} .dg-label-chip {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.14);
+  }
+
+  #{{ sect_id }} .dg-label-right {
+    position: absolute;
+    right: clamp(2.5rem, 7vw, 10rem);
+    top: 50%;
+    width: min(28vw, 360px);
+    color: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.15;
+  }
+
+  #{{ sect_id }} .dg-label-specs {
+    margin: 0;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  #{{ sect_id }} .dg-label-row {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    align-items: baseline;
+    gap: 0.8rem;
+  }
+
+  #{{ sect_id }} .dg-label-row dt,
+  #{{ sect_id }} .dg-label-row dd {
+    margin: 0;
+    font-size: 9px;
+  }
+
+  #{{ sect_id }} .dg-label-val {
+    font-size: clamp(9px, 0.72vw, 11px);
+  }
+
+  @media (max-width: 53em) {
+    #{{ sect_id }} .dg-label {
+      inset: auto 0 max(6.25rem, env(safe-area-inset-bottom)) 0;
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+      align-items: start;
+      gap: 0.55rem 1.5rem;
+      padding: 0 max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
+    }
+    #{{ sect_id }} .dg-label-left {
+      position: static;
+      gap: 0.5rem;
+      grid-column: 1;
+      grid-row: 2;
+    }
+    #{{ sect_id }} .dg-label-right {
+      position: static;
+      width: auto;
+      max-width: min(58vw, 270px);
+      grid-column: 2;
+      grid-row: 2;
+    }
+  }
+</style>
+
+<div id="{{ sect_id }}">
+  <div class="dg-sticky">
+    <canvas class="dg-canvas"></canvas>
+    <div class="dg-label">
+      <div class="dg-label-left">
+        <p class="dg-label-index"></p>
+        <p class="dg-label-word"></p>
+        <span class="dg-label-chip"></span>
+      </div>
+      <article class="dg-label-right">
+        <dl class="dg-label-specs">
+          <div class="dg-label-row"><dt>CMYK</dt><dd class="dg-label-val dg-cmyk"></dd></div>
+          <div class="dg-label-row"><dt>RGB</dt><dd class="dg-label-val dg-rgb"></dd></div>
+          <div class="dg-label-row"><dt>HEX</dt><dd class="dg-label-val dg-hex"></dd></div>
+          <div class="dg-label-row"><dt>PMS</dt><dd class="dg-label-val dg-pms"></dd></div>
+        </dl>
+      </article>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SECT_ID = {{ sect_id | json }};
+  var PLANE_GAP = {{ section.settings.plane_gap | default: 5 }};
+
+  /* ── Gallery data from Shopify blocks ─────────────────────────── */
+  var galleryData = [
+    {%- for block in section.blocks -%}
+    {
+      textureSrc: {%- if block.settings.image != blank -%}{{ block.settings.image | img_url: '1200x' | json }}{%- else -%}null{%- endif -%},
+      fallbackColor: {{ block.settings.accent_color | default: '#ffffff' | json }},
+      accentColor:   {{ block.settings.accent_color | default: '#ffffff' | json }},
+      backgroundColor: {{ block.settings.bg_color   | default: '#fffaf0' | json }},
+      blob1Color:    {{ block.settings.blob1_color   | default: '#ffffff' | json }},
+      blob2Color:    {{ block.settings.blob2_color   | default: '#cccccc' | json }},
+      position: { x: {{ block.settings.x_position | default: 0 }}, y: 0 },
+      label: {
+        word:  {{ block.settings.label_word  | default: 'tone' | json }},
+        pms:   {{ block.settings.label_pms   | default: 'N/A'  | json }},
+        color: {{ block.settings.label_color | default: '#f4f4f4' | json }}
+      }
+    }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ];
+
+  if (galleryData.length === 0) return;
+
+  /* ── Load Three.js then initialise ────────────────────────────── */
+  function setup() {
+    var T = window.THREE;
+    var outerEl = document.getElementById(SECT_ID);
+    if (!outerEl || !T) return;
+
+    var stickyEl  = outerEl.querySelector('.dg-sticky');
+    var canvas    = outerEl.querySelector('.dg-canvas');
+    var labelEl   = outerEl.querySelector('.dg-label');
+    var indexEl   = outerEl.querySelector('.dg-label-index');
+    var wordEl    = outerEl.querySelector('.dg-label-word');
+    var chipEl    = outerEl.querySelector('.dg-label-chip');
+    var cmykEl    = outerEl.querySelector('.dg-cmyk');
+    var rgbEl     = outerEl.querySelector('.dg-rgb');
+    var hexEl     = outerEl.querySelector('.dg-hex');
+    var pmsEl     = outerEl.querySelector('.dg-pms');
+
+    /* ── GLSL ──────────────────────────────────────────────────── */
+    var VERT = 'varying vec2 vUv;\nvoid main(){\n  vUv=uv;\n  gl_Position=vec4(position.xy,0.0,1.0);\n}';
+    var FRAG = [
+      'varying vec2 vUv;',
+      'uniform vec3  uBackgroundColor;',
+      'uniform vec3  uBlob1Color;',
+      'uniform vec3  uBlob2Color;',
+      'uniform float uNoiseStrength;',
+      'uniform float uBlobRadius;',
+      'uniform float uBlobRadiusSecondary;',
+      'uniform float uBlobStrength;',
+      'uniform float uTime;',
+      'uniform float uVelocityIntensity;',
+      'float random(vec2 c){return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453123);}',
+      'void main(){',
+      '  vec3 col=uBackgroundColor;',
+      '  float t=uTime*0.00028;',
+      '  vec2 b1=vec2(0.50+sin(t*1.000)*0.13+sin(t*1.618)*0.05,0.48+cos(t*0.794)*0.09+cos(t*1.272)*0.03);',
+      '  vec2 b2=vec2(0.35+cos(t*0.927)*0.11+cos(t*1.414)*0.04,0.55+sin(t*1.175)*0.07+sin(t*0.618)*0.03);',
+      '  float s1=smoothstep(uBlobRadius,0.0,distance(vUv,b1));',
+      '  float s2=smoothstep(uBlobRadiusSecondary,0.0,distance(vUv,b2));',
+      '  col=mix(col,mix(uBlob1Color,uBackgroundColor,0.35),s1*uBlobStrength);',
+      '  col=mix(col,mix(uBlob2Color,uBackgroundColor,0.35),s2*uBlobStrength);',
+      '  col+=uVelocityIntensity*0.10;',
+      '  col+=( random(vUv*vec2(1387.13,947.91))-0.5)*uNoiseStrength;',
+      '  gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);',
+      '}'
+    ].join('\n');
+
+    /* ── Helpers ───────────────────────────────────────────────── */
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    /* ── Scene / camera / renderer ─────────────────────────────── */
+    var scene    = new T.Scene();
+    var camera   = new T.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 6);
+
+    var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = T.SRGBColorSpace;
+    renderer.autoClear = false;
+
+    /* ── Background (GLSL full-screen quad) ────────────────────── */
+    var bgScene  = new T.Scene();
+    var bgCamera = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    var bgColors = {
+      bg:   new T.Color('#fffaf0'),
+      b1:   new T.Color('#ffdf94'),
+      b2:   new T.Color('#fce7c4'),
+      nextBg: new T.Color(),
+      nextB1: new T.Color(),
+      nextB2: new T.Color()
+    };
+    var bgMat = new T.ShaderMaterial({
+      vertexShader: VERT,
+      fragmentShader: FRAG,
+      depthWrite: false,
+      depthTest: false,
+      uniforms: {
+        uBackgroundColor:    { value: bgColors.bg },
+        uBlob1Color:         { value: bgColors.b1 },
+        uBlob2Color:         { value: bgColors.b2 },
+        uNoiseStrength:      { value: 0.04 },
+        uBlobRadius:         { value: 0.65 },
+        uBlobRadiusSecondary:{ value: 0.65 * 0.78 },
+        uBlobStrength:       { value: 0.9 },
+        uTime:               { value: 0 },
+        uVelocityIntensity:  { value: 0 }
+      }
+    });
+    bgScene.add(new T.Mesh(new T.PlaneGeometry(2, 2), bgMat));
+
+    var bgSmoothedDepth = 0, bgSmoothedVel = 0;
+    var baseBlobR = 0.65, baseBlobStr = 0.9;
+
+    function bgSetMoodBlend(data) {
+      if (!data) return;
+      var blend = clamp(data.blend || 0, 0, 1);
+      if (!data.nextMood || blend <= 0) {
+        bgColors.bg.set(data.currentMood.background);
+        bgColors.b1.set(data.currentMood.blob1);
+        bgColors.b2.set(data.currentMood.blob2);
+      } else {
+        bgColors.bg.set(data.currentMood.background).lerp(bgColors.nextBg.set(data.nextMood.background), blend);
+        bgColors.b1.set(data.currentMood.blob1).lerp(bgColors.nextB1.set(data.nextMood.blob1), blend);
+        bgColors.b2.set(data.currentMood.blob2).lerp(bgColors.nextB2.set(data.nextMood.blob2), blend);
+      }
+      bgMat.uniforms.uBackgroundColor.value.copy(bgColors.bg);
+      bgMat.uniforms.uBlob1Color.value.copy(bgColors.b1);
+      bgMat.uniforms.uBlob2Color.value.copy(bgColors.b2);
+    }
+
+    function bgUpdate(time, depthProg, velIntensity) {
+      bgSmoothedDepth = lerp(bgSmoothedDepth, depthProg, 0.1);
+      bgSmoothedVel   = lerp(bgSmoothedVel,   velIntensity, 0.1);
+      bgMat.uniforms.uBlobRadius.value          = clamp(baseBlobR   + bgSmoothedDepth * 0.08, 0.05, 1);
+      bgMat.uniforms.uBlobRadiusSecondary.value  = bgMat.uniforms.uBlobRadius.value * 0.78;
+      bgMat.uniforms.uBlobStrength.value         = clamp(baseBlobStr + bgSmoothedVel  * 0.1,  0, 1);
+      bgMat.uniforms.uTime.value                 = time;
+      bgMat.uniforms.uVelocityIntensity.value    = bgSmoothedVel;
+    }
+
+    /* ── Gallery planes ─────────────────────────────────────────── */
+    var planes = [];
+    var planeGeo = new T.PlaneGeometry(3, 3);
+    var mobileBreakpoint = 768;
+    var desktopScale  = 1,   mobileScale  = 0.65;
+    var mobileXSpread = 0.25;
+    var moodOffset    = 1,   fadeSampleOffset = 1;
+    var fadeSmoothM   = 0.14;
+    var parallaxEnabled = true, parallaxAmtX = 0.16, parallaxAmtY = 0.08, parallaxSmooth = 0.08;
+    var breathEnabled   = true, breathTilt   = 0.045, breathScale = 0.03, breathSmooth   = 0.14, breathGain = 1.1;
+    var gestureEnabled  = true, gestureAmtY  = 0.05,  gestureSmooth = 0.05;
+    var ptrTarget = new T.Vector2(0, 0), ptrCurrent = new T.Vector2(0, 0);
+    var breathInt = 0, targetBreath = 0, driftCurrent = 0, driftTarget = 0;
+
+    function getXSpreadFactor() {
+      return window.innerWidth <= mobileBreakpoint ? mobileXSpread : 1;
+    }
+
+    function layoutPlanes() {
+      var xSF = getXSpreadFactor();
+      planes.forEach(function(p, i) {
+        var bp = p.userData.basePosition || { x: 0, y: 0 };
+        p.position.set(bp.x * xSF, bp.y, -i * PLANE_GAP);
+      });
+    }
+
+    function updatePlaneScale() {
+      var isMobile = window.innerWidth <= mobileBreakpoint;
+      var sc = isMobile ? mobileScale : desktopScale;
+      planes.forEach(function(p) {
+        var ar = p.userData.aspectRatio || 1;
+        p.scale.set(sc * ar, sc, 1);
+      });
+    }
+
+    function getDepthRange() {
+      if (!planes.length) return { nearestZ: 0, deepestZ: 0 };
+      var zArr = planes.map(function(p) { return p.position.z; });
+      return { nearestZ: Math.max.apply(null, zArr), deepestZ: Math.min.apply(null, zArr) };
+    }
+
+    function getDepthProgress(cameraZ) {
+      var dr = getDepthRange(), span = dr.nearestZ - dr.deepestZ;
+      if (span <= 0) return 0;
+      return clamp((dr.nearestZ - cameraZ) / span, 0, 1);
+    }
+
+    function getPlaneBlendData(cameraZ) {
+      if (!planes.length) return null;
+      var gap = Math.max(PLANE_GAP, 0.0001);
+      var firstZ  = planes[0].position.z;
+      var lastIdx = planes.length - 1;
+      var sampledZ = cameraZ - gap * fadeSampleOffset;
+      var normD = clamp((firstZ - sampledZ) / gap, 0, lastIdx);
+      var cur  = Math.floor(normD), nxt = Math.min(cur + 1, lastIdx);
+      return { currentPlaneIndex: cur, nextPlaneIndex: nxt, blend: normD - cur };
+    }
+
+    function getMoodBlendData(cameraZ) {
+      if (!planes.length) return null;
+      var gap = Math.max(PLANE_GAP, 0.0001);
+      var lastIdx = planes.length - 1;
+      if (lastIdx === 0) {
+        var m = planes[0].userData;
+        var s = { background: m.backgroundColor, blob1: m.blob1Color, blob2: m.blob2Color };
+        return { currentMood: s, nextMood: s, blend: 0 };
+      }
+      var firstZ = planes[0].position.z;
+      var sZ = cameraZ - gap * moodOffset;
+      var nd = clamp((firstZ - sZ) / gap, 0, lastIdx);
+      var ci = Math.floor(nd), ni = Math.min(ci + 1, lastIdx);
+      function mood(i) {
+        var u = planes[i].userData;
+        return { background: u.backgroundColor, blob1: u.blob1Color, blob2: u.blob2Color };
+      }
+      return { currentMood: mood(ci), nextMood: mood(ni), blend: nd - ci };
+    }
+
+    function updatePlaneVisibility(cameraZ) {
+      var bd = getPlaneBlendData(cameraZ);
+      if (!bd) return;
+      planes.forEach(function(p, i) {
+        var target = 0;
+        if (i === bd.currentPlaneIndex) target = 1 - bd.blend;
+        if (i === bd.nextPlaneIndex)    target = Math.max(target, bd.blend);
+        var cur = isFinite(p.material.opacity) ? p.material.opacity : 0;
+        p.material.opacity = lerp(cur, target, fadeSmoothM);
+        p.material.needsUpdate = true;
+      });
+    }
+
+    function updatePlaneMotion(scroll) {
+      ptrCurrent.lerp(ptrTarget, parallaxSmooth);
+      var velMax  = Math.max((scroll && scroll.velocityMax) || 1, 0.0001);
+      var velNorm = clamp(Math.abs((scroll && scroll.velocity) || 0) / velMax, 0, 1);
+      var drift   = clamp(((scroll && scroll.velocity) || 0) / velMax, -1, 1);
+      targetBreath  = breathEnabled ? clamp(velNorm * breathGain, 0, 1) : 0;
+      breathInt     = lerp(breathInt, targetBreath, breathSmooth);
+      driftTarget   = gestureEnabled ? drift : 0;
+      driftCurrent  = lerp(driftCurrent, driftTarget, gestureSmooth);
+      var xSF = getXSpreadFactor();
+      planes.forEach(function(p, i) {
+        var bp  = p.userData.basePosition || { x: 0, y: 0 };
+        var op  = isFinite(p.material.opacity) ? p.material.opacity : 0;
+        var di  = 1 + i * 0.05;
+        var pi  = parallaxEnabled ? op * di : 0;
+        var bi  = breathEnabled ? breathInt * op : 0;
+        p.position.x = bp.x * xSF + ptrCurrent.x * parallaxAmtX * pi;
+        p.position.y = bp.y         + ptrCurrent.y * parallaxAmtY * pi + driftCurrent * gestureAmtY;
+        p.position.z = -i * PLANE_GAP;
+        p.rotation.x = -ptrCurrent.y * breathTilt * bi;
+        p.rotation.y =  ptrCurrent.x * breathTilt * bi;
+        var isMobile = window.innerWidth <= mobileBreakpoint;
+        var bs = isMobile ? mobileScale : desktopScale;
+        var sp = 1 + breathScale * bi;
+        var ar = p.userData.aspectRatio || 1;
+        p.scale.set(bs * ar * sp, bs * sp, 1);
+      });
+    }
+
+    function onPointerMove(e) {
+      ptrTarget.set((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    }
+    function onPointerLeave() { ptrTarget.set(0, 0); }
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerleave', onPointerLeave, { passive: true });
+
+    /* ── Trail ──────────────────────────────────────────────────── */
+    var trailGroup  = new T.Group();
+    var trailPoints = [];
+    var trailMesh   = null;
+    var trailMat    = new T.MeshStandardMaterial({
+      color: new T.Color('#f6f9ff'),
+      emissive: new T.Color('#ffffff'),
+      emissiveIntensity: 1.35,
+      roughness: 0.2, metalness: 0.05,
+      transparent: true, opacity: 0.84,
+      depthWrite: false, depthTest: false,
+      blending: T.NormalBlending
+    });
+    var trailCurveTension = 0.67, trailSmoothing = 0.53;
+    var trailMaxPoints = 220, trailMaxTrim = 4, trailMinDist = 0.006;
+    scene.add(trailGroup);
+    scene.add(new T.AmbientLight(0xffffff, 1.5));
+
+    function trailReset() {
+      if (trailMesh) { trailMesh.geometry.dispose(); trailGroup.remove(trailMesh); trailMesh = null; }
+      trailPoints = [];
+    }
+
+    function createTaperedTube(curve, segs, rHead, rTail) {
+      var pts = curve.getSpacedPoints(segs);
+      var radSegs = 8, ringPts = radSegs + 1;
+      var verts = [], idxs = [];
+      var up = new T.Vector3(0, 0, 1), tan = new T.Vector3(), nor = new T.Vector3();
+      var bin = new T.Vector3(), off = new T.Vector3(), vp = new T.Vector3();
+      for (var i = 0; i < pts.length; i++) {
+        var t = i / Math.max(pts.length - 1, 1);
+        var r = rHead + (rTail - rHead) * Math.pow(t, 1.5);
+        curve.getTangent(t, tan); tan.normalize();
+        nor.crossVectors(up, tan).normalize();
+        if (nor.lengthSq() === 0) nor.set(1, 0, 0);
+        bin.crossVectors(tan, nor).normalize();
+        for (var j = 0; j <= radSegs; j++) {
+          var ang = (j / radSegs) * Math.PI * 2;
+          off.copy(nor).multiplyScalar(-Math.cos(ang) * r).addScaledVector(bin, Math.sin(ang) * r);
+          vp.copy(pts[i]).add(off);
+          verts.push(vp.x, vp.y, vp.z);
+        }
+      }
+      for (var i = 0; i < pts.length - 1; i++) {
+        for (var j = 0; j < radSegs; j++) {
+          var b = i * ringPts + j;
+          idxs.push(b, b + ringPts, b + 1, b + ringPts, b + ringPts + 1, b + 1);
+        }
+      }
+      var geo = new T.BufferGeometry();
+      geo.setAttribute('position', new T.Float32BufferAttribute(verts, 3));
+      geo.setIndex(idxs);
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    function trailAddPoint(pos) {
+      if (!(pos instanceof T.Vector3)) return;
+      var last = trailPoints[trailPoints.length - 1] || null;
+      if (last && pos.distanceToSquared(last) < trailMinDist * trailMinDist) return;
+      var next = pos.clone();
+      if (last && next.distanceTo(last) > 999) { trailPoints = [next]; if (trailMesh) { trailMesh.geometry.dispose(); trailGroup.remove(trailMesh); trailMesh = null; } return; }
+      var eased = last ? last.clone().lerp(next, trailSmoothing) : next;
+      trailPoints.push(eased);
+      var budget = trailMaxTrim;
+      while (trailPoints.length > trailMaxPoints && budget > 0) { trailPoints.shift(); budget--; }
+      if (trailPoints.length < 2) return;
+      var curve = new T.CatmullRomCurve3(trailPoints, false, 'centripetal', trailCurveTension);
+      var segs  = Math.max(24, Math.min(220, trailPoints.length * 4));
+      var geo   = createTaperedTube(curve, segs, 0.012, 0.003);
+      if (!trailMesh) {
+        trailMesh = new T.Mesh(geo, trailMat);
+        trailMesh.renderOrder = 1200;
+        trailGroup.add(trailMesh);
+      } else {
+        trailMesh.geometry.dispose();
+        trailMesh.geometry = geo;
+      }
+    }
+
+    /* ── Trail head particles ───────────────────────────────────── */
+    var partGroup = new T.Group(); partGroup.renderOrder = 1300;
+    scene.add(partGroup);
+    var partGeo   = new T.SphereGeometry(1, 5, 4);
+    var particles = [];
+    var partSpawnAcc = 0, partNextIdx = 0;
+    for (var _i = 0; _i < 18; _i++) {
+      var pm = new T.MeshBasicMaterial({ color: new T.Color('#f6f9ff'), transparent: true, opacity: 0, depthWrite: false, depthTest: false });
+      var pm2 = new T.Mesh(partGeo, pm);
+      pm2.visible = false;
+      partGroup.add(pm2);
+      particles.push({ mesh: pm2, velocity: new T.Vector3(), life: 0, totalLife: 0 });
+    }
+
+    function spawnParticle(headPos) {
+      var p = particles[partNextIdx]; partNextIdx = (partNextIdx + 1) % particles.length;
+      var ang = Math.random() * Math.PI * 2, rad = Math.random() * 0.52;
+      p.mesh.position.set(headPos.x + Math.cos(ang) * rad, headPos.y + (Math.random() - 0.5) * 0.52 * 0.6, headPos.z + Math.sin(ang) * rad);
+      var sz = lerp(0.007, 0.02, Math.random()); p.mesh.scale.setScalar(sz); p.mesh.visible = true;
+      var sp = lerp(0.05, 0.22, Math.random());
+      p.velocity.set((Math.random() - 0.5) * sp, (Math.random() - 0.5) * sp * 0.6, (Math.random() - 0.5) * sp);
+      p.totalLife = lerp(0.25, 0.6, Math.random()); p.life = p.totalLife; p.mesh.material.opacity = 0.4;
+    }
+
+    function updateParticles(dt, headPos, masterOpacity, shouldSpawn) {
+      var safe = Math.min(Math.max(dt || 0, 0), 0.1);
+      if (shouldSpawn && safe > 0) {
+        partSpawnAcc += safe * 20;
+        var cnt = Math.floor(partSpawnAcc); partSpawnAcc -= cnt;
+        for (var i = 0; i < cnt; i++) spawnParticle(headPos);
+      } else { partSpawnAcc = 0; }
+      var drag = Math.pow(0.94, safe * 60);
+      particles.forEach(function(p) {
+        if (p.life <= 0) return;
+        p.life -= safe;
+        if (p.life <= 0) { p.life = 0; p.mesh.visible = false; p.mesh.material.opacity = 0; return; }
+        p.velocity.multiplyScalar(drag);
+        p.mesh.position.addScaledVector(p.velocity, safe);
+        p.mesh.material.opacity = (p.life / p.totalLife) * clamp(masterOpacity, 0, 1) * 0.75;
+      });
+    }
+
+    /* ── Trail controller ───────────────────────────────────────── */
+    var trailCfg = {
+      startX: -0.96, startY: -1.05, hWidth: 3, hCycles: 1.85,
+      vAmp: 0.78, vCycles: 2.1, distAhead: 1.65, baseDepth: 4.78, depthSpan: 6.52, progDepthOff: -0.1
+    };
+    var trailRuntime = {
+      seeded: false, userMoved: false, prevProgress: null, prevDir: 0, currentOpacity: 0.51
+    };
+    var trailHeadPos = new T.Vector3();
+    var trailPrevTime = null;
+
+    function getDeltaSeconds(time) {
+      if (trailPrevTime === null) { trailPrevTime = time; return 0; }
+      var d = (time - trailPrevTime) / 1000; trailPrevTime = time;
+      return Math.min(d, 0.1);
+    }
+
+    function computeHeadPosition(cameraZ, progress) {
+      var cp = clamp(progress, 0, 1);
+      var isMobile = window.innerWidth <= mobileBreakpoint;
+      var sx = trailCfg.startX + (isMobile ? 0.35 : 0);
+      var hw = trailCfg.hWidth * (isMobile ? 0.35 : 1);
+      var x = sx + Math.sin(cp * Math.PI * 2 * trailCfg.hCycles) * hw;
+      var y = trailCfg.startY + Math.sin(cp * Math.PI * 2 * trailCfg.vCycles) * trailCfg.vAmp;
+      var dp = trailCfg.progDepthOff + cp * (1 - trailCfg.progDepthOff);
+      var z = cameraZ + trailCfg.distAhead - (trailCfg.baseDepth + dp * trailCfg.depthSpan);
+      trailHeadPos.set(x, y, z);
+      return trailHeadPos;
+    }
+
+    function getTrailProgress(cam, scroll) {
+      var sr = ((scroll && scroll.maxCameraZ) || 0) - ((scroll && scroll.minCameraZ) || 0);
+      if (isFinite(sr) && sr > 0) return clamp(((scroll.maxCameraZ - cam.position.z) / sr), 0, 1);
+      var bd = getPlaneBlendData(cam.position.z);
+      if (bd) return clamp((bd.currentPlaneIndex + bd.blend) / Math.max(planes.length - 1, 1), 0, 1);
+      return getDepthProgress(cam.position.z);
+    }
+
+    function updateTrail(cam, scroll, time) {
+      var dt = getDeltaSeconds(time);
+      var prog = getTrailProgress(cam, scroll);
+      if (prog > 0.01) trailRuntime.userMoved = true;
+      var rawDir = trailRuntime.prevProgress === null ? 0 : Math.sign(prog - trailRuntime.prevProgress);
+      var dir = Math.abs(prog - (trailRuntime.prevProgress || 0)) <= 0.0005 ? 0 : rawDir;
+      var reversed = dir !== 0 && trailRuntime.prevDir !== 0 && dir !== trailRuntime.prevDir;
+
+      var lengthProg = dir < 0 ? prog * 0.55 : prog;
+      trailMaxPoints = Math.round(lerp(14, 220, clamp(lengthProg, 0, 1)));
+      trailMaxTrim   = dir < 0 ? 32 : 4;
+
+      var headPos = computeHeadPosition(cam.position.z, prog);
+
+      var edgeDist = Math.min(clamp(prog + 0.1, 0, 1), 1 - prog);
+      var edgeVis  = T.MathUtils.smoothstep(edgeDist, 0.04, 0.2);
+      var startVis = (!trailRuntime.userMoved && prog <= 0.01) ? 0.55 : 0;
+      var targetOp = 0.51 * Math.max(edgeVis, startVis);
+      trailRuntime.currentOpacity = lerp(trailRuntime.currentOpacity, targetOp, 0.12);
+      trailMat.opacity = trailRuntime.currentOpacity;
+
+      if (reversed) {
+        trailReset();
+        var restartPt = headPos.clone(); restartPt.z += dir * 0.12;
+        trailAddPoint(restartPt);
+      }
+      trailAddPoint(headPos);
+      if (dir !== 0) trailRuntime.prevDir = dir;
+      trailRuntime.prevProgress = prog;
+
+      updateParticles(dt, headPos, trailRuntime.currentOpacity, true);
+    }
+
+    function seedTrail(cam) {
+      if (trailRuntime.seeded) return;
+      var startPos = computeHeadPosition(cam.position.z, 0).clone();
+      for (var i = 10; i >= 0; i--) {
+        var sp = startPos.clone(); sp.z -= i * 0.12;
+        trailAddPoint(sp);
+      }
+      trailRuntime.seeded = true;
+    }
+
+    /* ── Label (DOM) ────────────────────────────────────────────── */
+    var activeLabelIdx = -1;
+
+    function normalizeHex(raw) {
+      var h = (raw || '').trim(); if (!h) return '#ffffff';
+      if (!h.startsWith('#')) h = '#' + h;
+      if (/^#[0-9a-fA-F]{3}$/.test(h)) h = '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+      return /^#[0-9a-fA-F]{6}$/.test(h) ? h.toLowerCase() : '#ffffff';
+    }
+    function hexToRgb(h) {
+      var n = normalizeHex(h).slice(1);
+      return { r: parseInt(n.slice(0,2),16), g: parseInt(n.slice(2,4),16), b: parseInt(n.slice(4,6),16) };
+    }
+    function rgbToCmyk(c) {
+      var r=c.r/255, g=c.g/255, b=c.b/255, k=1-Math.max(r,g,b);
+      if (k >= 0.999) return { c:0, m:0, y:0, k:100 };
+      return { c:Math.round(((1-r-k)/(1-k))*100), m:Math.round(((1-g-k)/(1-k))*100), y:Math.round(((1-b-k)/(1-k))*100), k:Math.round(k*100) };
+    }
+
+    function updateLabel(cam) {
+      if (!labelEl) return;
+      var bd = getPlaneBlendData(cam.position.z);
+      if (!bd) { labelEl.style.opacity = '0'; return; }
+      var idx = bd.blend >= 0.5 ? bd.nextPlaneIndex : bd.currentPlaneIndex;
+      if (idx < 0 || idx >= planes.length) { labelEl.style.opacity = '0'; return; }
+      labelEl.style.opacity = '1';
+      if (idx === activeLabelIdx) return;
+      activeLabelIdx = idx;
+      var p  = planes[idx];
+      var ld = p.userData.label || {};
+      var ac = normalizeHex(p.userData.accentColor);
+      var rgb  = hexToRgb(ac);
+      var cmyk = rgbToCmyk(rgb);
+      indexEl.textContent = String(idx + 1).padStart(2, '0');
+      wordEl.textContent  = ld.word || 'tone';
+      chipEl.style.backgroundColor = ac;
+      cmykEl.textContent  = cmyk.c+', '+cmyk.m+', '+cmyk.y+', '+cmyk.k;
+      rgbEl.textContent   = rgb.r+', '+rgb.g+', '+rgb.b;
+      hexEl.textContent   = ac.slice(1).toUpperCase();
+      pmsEl.textContent   = ld.pms || 'N/A';
+      labelEl.style.color = ld.color || '';
+    }
+
+    /* ── Scroll progress reader (no event capture) ─────────────── */
+    var maxCameraZ, minCameraZ;
+
+    function readScrollProgress() {
+      var rect = outerEl.getBoundingClientRect();
+      var scrollable = outerEl.offsetHeight - window.innerHeight;
+      if (scrollable <= 0) return 0;
+      return clamp(-rect.top / scrollable, 0, 1);
+    }
+
+    /* ── Init ───────────────────────────────────────────────────── */
+    var textureLoader = new T.TextureLoader();
+    var loadQueue = galleryData.filter(function(d) { return d.textureSrc; }).map(function(d) { return d.textureSrc; });
+    var textureMap = new Map();
+    var loadedCount = 0;
+
+    function afterTexturesLoaded() {
+      galleryData.forEach(function(d, i) {
+        var tex = d.textureSrc ? (textureMap.get(d.textureSrc) || null) : null;
+        if (tex) tex.colorSpace = T.SRGBColorSpace;
+        var ar = (tex && tex.image && tex.image.width > 0) ? tex.image.width / tex.image.height : 1;
+        var mat = new T.MeshBasicMaterial({
+          color: tex ? '#ffffff' : (d.fallbackColor || '#ffffff'),
+          map: tex || null,
+          side: T.DoubleSide,
+          transparent: true,
+          depthWrite: false,
+          opacity: i === 0 ? 1 : 0
+        });
+        var mesh = new T.Mesh(planeGeo, mat);
+        mesh.userData.basePosition  = d.position || { x: 0, y: 0 };
+        mesh.userData.aspectRatio   = ar;
+        mesh.userData.baseColor     = d.fallbackColor || '#ffffff';
+        mesh.userData.accentColor   = d.accentColor   || d.fallbackColor || '#ffffff';
+        mesh.userData.backgroundColor = d.backgroundColor || '#fffaf0';
+        mesh.userData.blob1Color    = d.blob1Color || '#ffffff';
+        mesh.userData.blob2Color    = d.blob2Color || '#cccccc';
+        mesh.userData.label         = d.label || { word: 'tone', pms: 'N/A', color: '' };
+        scene.add(mesh);
+        planes.push(mesh);
+      });
+
+      updatePlaneScale();
+      layoutPlanes();
+
+      var dr = getDepthRange();
+      maxCameraZ = dr.nearestZ + 5;
+      minCameraZ = dr.deepestZ + 5;
+      camera.position.z = maxCameraZ;
+      prevCameraZ = maxCameraZ;
+
+      seedTrail(camera);
+      resize();
+      window.addEventListener('resize', resize);
+      initialized = true;
+      if (sectionVisible) startLoop();
+    }
+
+    if (loadQueue.length === 0) {
+      afterTexturesLoaded();
+    } else {
+      loadQueue.forEach(function(src) {
+        textureLoader.load(src, function(tex) {
+          textureMap.set(src, tex);
+          loadedCount++;
+          if (loadedCount === loadQueue.length) afterTexturesLoaded();
+        }, undefined, function() {
+          loadedCount++;
+          if (loadedCount === loadQueue.length) afterTexturesLoaded();
+        });
+      });
+    }
+
+    /* ── Resize ─────────────────────────────────────────────────── */
+    function resize() {
+      var w = canvas.clientWidth  || window.innerWidth  || 1;
+      var h = canvas.clientHeight || window.innerHeight || 1;
+      if (w <= 0 || h <= 0) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+      if (planes.length) { updatePlaneScale(); layoutPlanes(); }
+    }
+
+    /* ── Render loop ────────────────────────────────────────────── */
+    var rafId = null, isRunning = false, initialized = false, sectionVisible = false;
+    var prevCameraZ = camera.position.z, velocity = 0, velocityMax = 1.5;
+
+    function startLoop() {
+      if (isRunning) return;
+      isRunning = true;
+      prevCameraZ = camera.position.z;
+      loop();
+    }
+
+    function loop() {
+      if (!isRunning) return;
+      rafId = requestAnimationFrame(loop);
+      var time = performance.now();
+      var progress = readScrollProgress();
+
+      /* Smooth camera toward target Z */
+      var targetZ = maxCameraZ - progress * (maxCameraZ - minCameraZ);
+      camera.position.z = lerp(camera.position.z, targetZ, 0.08);
+
+      /* Velocity signal */
+      var rawVel = (camera.position.z - prevCameraZ) * 60;
+      velocity = lerp(velocity, rawVel, 0.12);
+      velocity = clamp(velocity, -velocityMax, velocityMax);
+      if (Math.abs(velocity) < 0.0001) velocity = 0;
+      prevCameraZ = camera.position.z;
+
+      var scrollObj = { velocity: velocity, velocityMax: velocityMax, maxCameraZ: maxCameraZ, minCameraZ: minCameraZ };
+
+      /* Gallery */
+      updatePlaneVisibility(camera.position.z);
+      updatePlaneMotion(scrollObj);
+
+      /* Label */
+      updateLabel(camera);
+
+      /* Background */
+      var moodBlend = getMoodBlendData(camera.position.z);
+      if (moodBlend) bgSetMoodBlend(moodBlend);
+      var depthProg  = getDepthProgress(camera.position.z);
+      var bd2 = getPlaneBlendData(camera.position.z);
+      var blend2 = bd2 ? bd2.blend : 0;
+      var distFromCenter = Math.abs(blend2 - 0.5) * 2;
+      var stability = T.MathUtils.smoothstep(distFromCenter, 0.35, 1);
+      var velInt = clamp(Math.abs(velocity) / velocityMax, 0, 1) * stability;
+      bgUpdate(time, depthProg, velInt);
+
+      /* Trail */
+      updateTrail(camera, scrollObj, time);
+
+      /* Render */
+      renderer.clear(true, true, true);
+      renderer.render(bgScene, bgCamera);
+      renderer.clearDepth();
+      renderer.render(scene, camera);
+    }
+
+    /* ── Pause/resume when section leaves viewport ──────────────── */
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        sectionVisible = e.isIntersecting;
+        if (sectionVisible && initialized && !isRunning) {
+          startLoop();
+        } else if (!sectionVisible && isRunning) {
+          isRunning = false;
+          if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        }
+      });
+    }, { rootMargin: '200px' });
+    observer.observe(outerEl);
+  } /* end setup() */
+
+  if (window.THREE) {
+    setup();
+  } else {
+    var _s = document.createElement('script');
+    _s.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';
+    _s.onload = setup;
+    document.head.appendChild(_s);
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Depth Gallery",
+  "tag": "section",
+  "class": "depth-gallery-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "scroll_height",
+      "label": "Scroll height (vh)",
+      "min": 200,
+      "max": 1000,
+      "step": 50,
+      "default": 600,
+      "info": "Total scroll distance for the gallery. More vh = slower/longer flythrough."
+    },
+    {
+      "type": "range",
+      "id": "plane_gap",
+      "label": "Depth gap between images",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "info": "Z-axis spacing between image planes in the 3D scene."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Gallery image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "label_word",
+          "label": "Mood word",
+          "default": "golden",
+          "info": "Short descriptive word shown on the left label."
+        },
+        {
+          "type": "text",
+          "id": "label_pms",
+          "label": "PMS colour code",
+          "default": "PMS 135 C",
+          "info": "Pantone swatch reference shown in the colour card."
+        },
+        {
+          "type": "color",
+          "id": "label_color",
+          "label": "Label text colour",
+          "default": "#f4f4f4",
+          "info": "Use dark (#2e2e2e) for light-background images."
+        },
+        {
+          "type": "color",
+          "id": "accent_color",
+          "label": "Accent colour",
+          "default": "#feca4f",
+          "info": "Colour chip and CMYK/RGB/HEX values are derived from this."
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background base colour",
+          "default": "#fffaf0"
+        },
+        {
+          "type": "color",
+          "id": "blob1_color",
+          "label": "Background blob 1",
+          "default": "#ffdf94"
+        },
+        {
+          "type": "color",
+          "id": "blob2_color",
+          "label": "Background blob 2",
+          "default": "#fce7c4"
+        },
+        {
+          "type": "range",
+          "id": "x_position",
+          "label": "Horizontal offset",
+          "min": -1.5,
+          "max": 1.5,
+          "step": 0.1,
+          "default": -0.9,
+          "info": "3D horizontal position of this image. Alternate left/right between items for the depth flythrough effect."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Depth Gallery",
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "label_word": "golden", "label_pms": "PMS 135 C",
+            "accent_color": "#feca4f", "bg_color": "#fffaf0",
+            "blob1_color": "#ffdf94", "blob2_color": "#fce7c4",
+            "label_color": "#2e2e2e", "x_position": -0.9
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "label_word": "violet", "label_pms": "PMS 4985 C",
+            "accent_color": "#80455a", "bg_color": "#fffaf0",
+            "blob1_color": "#d29a41", "blob2_color": "#bb96af",
+            "label_color": "#2e2e2e", "x_position": 0.8
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "label_word": "afterglow", "label_pms": "PMS 170 C",
+            "accent_color": "#fa7b71", "bg_color": "#5f81ab",
+            "blob1_color": "#f88b8d", "blob2_color": "#cfbbdd",
+            "label_color": "#f4f4f4", "x_position": -0.7
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "label_word": "cobalt", "label_pms": "PMS 660 C",
+            "accent_color": "#3c72c6", "bg_color": "#5b9bc2",
+            "blob1_color": "#ffaa00", "blob2_color": "#00e1ff",
+            "label_color": "#f4f4f4", "x_position": 1.0
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "label_word": "meadow", "label_pms": "PMS 7507 C",
+            "accent_color": "#fdd895", "bg_color": "#7d936e",
+            "blob1_color": "#fdd895", "blob2_color": "#a5b599",
+            "label_color": "#f4f4f4", "x_position": -0.7
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,567 @@
+<div id="ErvLabel-{{ section.id }}">
+  <section class="el-phero">
+    <div class="el-pp-container">
+      <div class="el-phero-grid">
+
+        <!-- ── Left column ── -->
+        <div>
+          <div class="el-phero-badges">
+            {% if section.settings.badge_1 != blank %}
+              {% assign _b1 = section.settings.badge_1 %}
+              {% assign _b1_first = _b1 | slice: 0 %}
+              <span class="el-tag el-tag-flag">{% if _b1_first == '★' %}<span class="el-star">★</span>{{ _b1 | slice: 1, 200 }}{% else %}{{ _b1 }}{% endif %}</span>
+            {% endif %}
+            {% if section.settings.badge_2 != blank %}
+              <span class="el-tag el-tag-stock"><span class="el-b-dot"></span>{{ section.settings.badge_2 }}</span>
+            {% endif %}
+          </div>
+
+          {% if section.settings.heading != blank %}
+            <h1 class="el-phero-h1">{{ section.settings.heading }}</h1>
+          {% endif %}
+          {% if section.settings.subheading != blank %}
+            <div class="el-phero-model">{{ section.settings.subheading }}</div>
+          {% endif %}
+          {% if section.settings.description != blank %}
+            <p class="el-phero-desc">{{ section.settings.description }}</p>
+          {% endif %}
+
+          {% comment %} ── Spec chips ── {% endcomment %}
+          {% assign stat_blocks = section.blocks | where: 'type', 'stat' %}
+          {% if stat_blocks.size > 0 %}
+            <div class="el-chip-row" style="grid-template-columns: repeat({{ stat_blocks.size }}, 1fr);">
+              {% for block in stat_blocks %}
+                <div class="el-chip" {{ block.shopify_attributes }}>
+                  <div class="el-chip-v">
+                    <span class="el-chip-num" data-chip-idx="{{ forloop.index0 }}">{{ block.settings.value }}</span>{% if block.settings.unit != blank %}<small>{{ block.settings.unit }}</small>{% endif %}
+                  </div>
+                  <div class="el-chip-l">{{ block.settings.label }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% comment %} ── Variant selector: title + text LEFT, options RIGHT ── {% endcomment %}
+          {% assign variant_blocks = section.blocks | where: 'type', 'variant' %}
+          {% if variant_blocks.size > 0 %}
+            <div class="el-vselect">
+              <div class="el-vselect-grid">
+
+                <div class="el-vselect-info">
+                  {% if section.settings.variant_title != blank %}
+                    <div class="el-vselect-title">{{ section.settings.variant_title }}</div>
+                  {% endif %}
+                  {% if section.settings.variant_text != blank %}
+                    <div class="el-vselect-text">{{ section.settings.variant_text }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="el-vchips" role="group">
+                  {% for block in variant_blocks %}
+                    <button
+                      type="button"
+                      class="el-vchip{% if forloop.first %} active{% endif %}"
+                      data-variant="{{ forloop.index0 }}"
+                      data-badge="{{ block.settings.stage_value }}"
+                      data-chips="{{ block.settings.chip_values | escape }}"
+                      {{ block.shopify_attributes }}
+                    >
+                      <div class="el-vchip-n">{{ block.settings.name }}</div>
+                      {% if block.settings.description != blank %}
+                        <div class="el-vchip-d">{{ block.settings.description }}</div>
+                      {% endif %}
+                    </button>
+                  {% endfor %}
+                </div>
+
+              </div>
+            </div>
+          {% endif %}
+
+          {% comment %} ── CTAs ── {% endcomment %}
+          {% if section.settings.button_1_text != blank or section.settings.button_2_text != blank %}
+            <div class="el-phero-ctas">
+              {% if section.settings.button_1_text != blank %}
+                <a href="{{ section.settings.button_1_link | default: '#' }}" class="el-btn el-btn-green el-btn-lg">
+                  {{ section.settings.button_1_text }}
+                </a>
+              {% endif %}
+              {% if section.settings.button_2_text != blank %}
+                <a href="{{ section.settings.button_2_link | default: '#' }}" class="el-btn el-btn-outline el-btn-lg">
+                  {{ section.settings.button_2_text }}
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% comment %} ── Trust items ── {% endcomment %}
+          {% assign trust_blocks = section.blocks | where: 'type', 'trust_item' %}
+          {% if trust_blocks.size > 0 %}
+            <div class="el-phero-trust">
+              {% for block in trust_blocks %}
+                <div class="el-t-item" {{ block.shopify_attributes }}>
+                  {% case block.settings.icon %}
+                    {% when 'shield' %}
+                      <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5z"/></svg>
+                    {% when 'clock' %}
+                      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    {% else %}
+                      <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                  {% endcase %}
+                  {{ block.settings.text }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- ── Right column: product stage ── -->
+        <div>
+          <div class="el-stage">
+            <div class="el-stage-grid"></div>
+            <div class="el-stage-badge">
+              <div>
+                <div class="el-sb-n" id="el-stageBadgeN-{{ section.id }}">{{ section.settings.stage_badge_value }}</div>
+                <div class="el-sb-l">{{ section.settings.stage_badge_label }}</div>
+              </div>
+            </div>
+            <div class="el-stage-shadow"></div>
+
+            <div class="el-stage-floater">
+            <svg class="el-stage-unit" viewBox="0 0 440 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="elBody{{ section.id }}" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffffff"/><stop offset="48%" stop-color="#eef2f3"/><stop offset="100%" stop-color="#d9e0e2"/>
+                </linearGradient>
+                <linearGradient id="elBodyTop{{ section.id }}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fbfcfc"/><stop offset="100%" stop-color="#dfe5e7"/>
+                </linearGradient>
+                <linearGradient id="elPort{{ section.id }}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#c2cbce"/><stop offset="100%" stop-color="#9aa6aa"/>
+                </linearGradient>
+                <linearGradient id="elDisp{{ section.id }}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0f2a1c"/><stop offset="100%" stop-color="#08160e"/>
+                </linearGradient>
+              </defs>
+
+              <!-- duct ports top -->
+              <g>
+                <ellipse cx="140" cy="70" rx="26" ry="11" fill="url(#elPort{{ section.id }})"/>
+                <ellipse cx="140" cy="66" rx="26" ry="11" fill="#eef2f3" stroke="#c2cbce" stroke-width="1.5"/>
+                <ellipse cx="140" cy="66" rx="17" ry="6.5" fill="#aab4b7"/>
+                <ellipse cx="300" cy="70" rx="26" ry="11" fill="url(#elPort{{ section.id }})"/>
+                <ellipse cx="300" cy="66" rx="26" ry="11" fill="#eef2f3" stroke="#c2cbce" stroke-width="1.5"/>
+                <ellipse cx="300" cy="66" rx="17" ry="6.5" fill="#aab4b7"/>
+              </g>
+              <!-- airflow indicator lines -->
+              <g stroke="#00B26B" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55">
+                <path d="M140 50 q0 -16 14 -22"/><path d="M148 44 q0 -12 12 -16"/>
+              </g>
+              <g stroke="#A7F432" stroke-width="2" stroke-linecap="round" fill="none" opacity=".7">
+                <path d="M300 50 q0 -16 -14 -22"/><path d="M292 44 q0 -12 -12 -16"/>
+              </g>
+              <!-- body -->
+              <path d="M86 92 L354 92 L368 78 L100 78 Z" fill="url(#elBodyTop{{ section.id }})" stroke="#cfd6d8" stroke-width="1.5"/>
+              <rect x="86" y="92" width="268" height="252" rx="16" fill="url(#elBody{{ section.id }})" stroke="#cfd6d8" stroke-width="1.5"/>
+              <path d="M354 92 L368 78 L368 326 L354 344 Z" fill="#cdd5d8" stroke="#bcc6c9" stroke-width="1"/>
+              <rect x="98" y="104" width="120" height="228" rx="10" fill="#ffffff" opacity=".35"/>
+              <!-- display screen -->
+              <rect x="116" y="124" width="120" height="64" rx="10" fill="url(#elDisp{{ section.id }})" stroke="#0a1f14" stroke-width="1.5"/>
+              <text x="130" y="158" font-family="'Outfit',sans-serif" font-size="30" font-weight="800" fill="#A7F432">{{ section.settings.display_value | truncate: 4, '' }}<tspan font-size="16" fill="#00B26B">%</tspan></text>
+              <text x="130" y="176" font-family="'Outfit',sans-serif" font-size="9" letter-spacing="1.5" fill="#3f7a58">{{ section.settings.display_label }}</text>
+              <circle cx="222" cy="136" r="3" fill="#A7F432"/>
+              <!-- control buttons -->
+              <circle cx="270" cy="135" r="9" fill="#eef2f3" stroke="#c8d0d2" stroke-width="1.5"/>
+              <circle cx="300" cy="135" r="9" fill="#eef2f3" stroke="#c8d0d2" stroke-width="1.5"/>
+              <path d="M266 135h8M296 135h8M300 131v8" stroke="#9aa6aa" stroke-width="1.6" stroke-linecap="round"/>
+              <!-- ventilation lines -->
+              <g stroke="#c5cdd0" stroke-width="2.5" stroke-linecap="round">
+                <path d="M116 224h208"/><path d="M116 240h208"/><path d="M116 256h208"/>
+                <path d="M116 272h208"/><path d="M116 288h208"/><path d="M116 304h208"/>
+              </g>
+              <!-- brand decal -->
+              <g transform="translate(116 192)">
+                {% if section.settings.stage_logo != blank %}
+                  <image href="{{ section.settings.stage_logo | image_url: width: 40 }}" x="0" y="0" width="20" height="20"/>
+                {% else %}
+                  <image href="{{ 'astberg-logo-updated.png' | asset_url }}" x="0" y="0" width="20" height="20"/>
+                {% endif %}
+                <text x="26" y="9" font-family="'Outfit',sans-serif" font-size="13" font-weight="800" letter-spacing="2" fill="#374151">ASTBERG</text>
+                <text x="26" y="19" font-family="'Outfit',sans-serif" font-size="6" font-weight="500" letter-spacing="3.4" fill="#9aa6aa">VENTILATION</text>
+              </g>
+              <!-- feet -->
+              <rect x="110" y="344" width="20" height="14" rx="3" fill="#b9c2c5"/>
+              <rect x="310" y="344" width="20" height="14" rx="3" fill="#b9c2c5"/>
+            </svg>
+            </div>
+
+            {% if section.settings.stage_hint_text != blank %}
+              <div class="el-stage-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><path d="M21 3v6h-6"/></svg>
+                {{ section.settings.stage_hint_text }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+/* ── Design tokens ── */
+#ErvLabel-{{ section.id }} {
+  --el-deep:    #0E7A43;
+  --el-fresh:   #00B26B;
+  --el-lime:    #A7F432;
+  --el-dark:    #111827;
+  --el-muted:   #6B7280;
+  --el-text:    #374151;
+  --el-border:  #E5E7EB;
+  --el-off:     #F5F7F6;
+  --el-metal-1: #f3f5f6;
+  --el-metal-2: #e3e8ea;
+  --el-metal-3: #cdd5d8;
+  --el-head:    'Outfit', system-ui, sans-serif;
+  --el-ease:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-family: var(--font-primary);
+  color: var(--el-text);
+  background: #ffffff;
+}
+#ErvLabel-{{ section.id }} *, #ErvLabel-{{ section.id }} *::before, #ErvLabel-{{ section.id }} *::after { box-sizing: border-box; }
+#ErvLabel-{{ section.id }} a { text-decoration: none; color: inherit; }
+
+/* ── Layout ── */
+#ErvLabel-{{ section.id }} .el-phero { padding: 40px 0 90px; }
+#ErvLabel-{{ section.id }} .el-pp-container { max-width: 1240px; margin: 0 auto; padding: 0 48px; }
+#ErvLabel-{{ section.id }} .el-phero-grid {
+  display: grid; grid-template-columns: 1.02fr 1.18fr; gap: 60px; align-items: start;
+}
+
+/* ── Badges ── */
+#ErvLabel-{{ section.id }} .el-phero-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+#ErvLabel-{{ section.id }} .el-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 600 11px/1 var(--el-head); letter-spacing: .04em;
+  padding: 7px 13px; border-radius: 100px; border: 1px solid;
+}
+#ErvLabel-{{ section.id }} .el-tag-flag  { color: var(--el-deep);  background: rgba(14,122,67,.07);  border-color: rgba(14,122,67,.18); }
+#ErvLabel-{{ section.id }} .el-tag-stock { color: var(--el-fresh); background: rgba(0,178,107,.08);  border-color: rgba(0,178,107,.2); }
+#ErvLabel-{{ section.id }} .el-star { color: var(--el-lime); }
+#ErvLabel-{{ section.id }} .el-b-dot {
+  width: 7px; height: 7px; background: var(--el-fresh); border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+  will-change: opacity, transform;
+  animation: el-bdot-{{ section.id }} 2s ease-in-out infinite;
+  animation-play-state: running;
+}
+@keyframes el-bdot-{{ section.id }} { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.65)} }
+
+/* ── Heading block ── */
+#ErvLabel-{{ section.id }} .el-phero-h1 {
+  font: 800 clamp(40px,5.2vw,72px)/1.0 var(--el-head);
+  letter-spacing: -.035em; color: var(--el-dark); margin: 0 0 8px;
+}
+#ErvLabel-{{ section.id }} .el-phero-model {
+  font: 600 15px/1 var(--el-head); letter-spacing: .12em;
+  color: var(--el-fresh); text-transform: uppercase; margin-bottom: 22px;
+}
+#ErvLabel-{{ section.id }} .el-phero-desc {
+  font-size: 17px; line-height: 1.72; color: var(--el-muted);
+  margin: 0 0 32px; max-width: 480px;
+}
+
+/* ── Spec chips ── */
+#ErvLabel-{{ section.id }} .el-chip-row {
+  display: grid; gap: 0;
+  border: 1px solid var(--el-border); border-radius: 14px; overflow: hidden; margin-bottom: 30px;
+}
+#ErvLabel-{{ section.id }} .el-chip { padding: 18px 16px; border-right: 1px solid var(--el-border); }
+#ErvLabel-{{ section.id }} .el-chip:last-child { border-right: none; }
+#ErvLabel-{{ section.id }} .el-chip-v { font: 700 24px/1 var(--el-head); color: var(--el-dark); letter-spacing: -.02em; }
+#ErvLabel-{{ section.id }} .el-chip-v small { font-size: 13px; font-weight: 600; color: var(--el-muted); margin-left: 2px; }
+#ErvLabel-{{ section.id }} .el-chip-l { font: 500 11px/1 var(--el-head); color: var(--el-muted); margin-top: 7px; letter-spacing: .02em; }
+
+/* ── Variant selector: title + text LEFT · chips RIGHT ── */
+#ErvLabel-{{ section.id }} .el-vselect { margin-bottom: 30px; }
+#ErvLabel-{{ section.id }} .el-vselect-grid {
+  display: grid; grid-template-columns: 0.8fr 1.4fr; gap: 24px; align-items: center;
+}
+#ErvLabel-{{ section.id }} .el-vselect-title {
+  font: 700 15px/1.3 var(--el-head); color: var(--el-dark); margin-bottom: 8px;
+}
+#ErvLabel-{{ section.id }} .el-vselect-text {
+  font-size: 13px; line-height: 1.65; color: var(--el-muted);
+}
+#ErvLabel-{{ section.id }} .el-vchips { display: flex; flex-direction: column; gap: 8px; }
+#ErvLabel-{{ section.id }} .el-vchip {
+  cursor: pointer; border: 1.5px solid var(--el-border); border-radius: 12px;
+  padding: 13px 14px; background: #fff; text-align: left; width: 100%;
+  font-family: inherit; transition: all .2s var(--el-ease);
+}
+#ErvLabel-{{ section.id }} .el-vchip:hover { border-color: var(--el-metal-3); }
+#ErvLabel-{{ section.id }} .el-vchip.active {
+  border-color: var(--el-fresh); background: rgba(0,178,107,.04);
+  box-shadow: 0 6px 20px rgba(0,178,107,.12);
+}
+#ErvLabel-{{ section.id }} .el-vchip-n { font: 700 14px/1 var(--el-head); color: var(--el-dark); }
+#ErvLabel-{{ section.id }} .el-vchip-d { font: 500 11.5px/1 var(--el-head); color: var(--el-muted); margin-top: 6px; }
+#ErvLabel-{{ section.id }} .el-vchip.active .el-vchip-d { color: var(--el-deep); }
+
+/* ── CTAs ── */
+#ErvLabel-{{ section.id }} .el-phero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
+#ErvLabel-{{ section.id }} .el-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: 600 15px/1 var(--el-head); border-radius: 9px; padding: 13px 26px;
+  cursor: pointer; border: 1.5px solid transparent; transition: all .22s var(--el-ease);
+}
+#ErvLabel-{{ section.id }} .el-btn-lg { padding: 17px 36px; font-size: 16px; border-radius: 11px; }
+#ErvLabel-{{ section.id }} .el-btn-green  { background: var(--el-fresh); color: #fff; border-color: var(--el-fresh); }
+#ErvLabel-{{ section.id }} .el-btn-green:hover  { background: var(--el-deep); border-color: var(--el-deep); transform: translateY(-1px); }
+#ErvLabel-{{ section.id }} .el-btn-outline { background: transparent; color: var(--el-deep); border-color: var(--el-deep); }
+#ErvLabel-{{ section.id }} .el-btn-outline:hover { background: var(--el-deep); color: #fff; }
+
+/* ── Trust bar ── */
+#ErvLabel-{{ section.id }} .el-phero-trust {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  font: 500 12.5px/1.4 var(--el-head); color: var(--el-muted);
+}
+#ErvLabel-{{ section.id }} .el-t-item { display: flex; align-items: center; gap: 7px; }
+#ErvLabel-{{ section.id }} .el-t-item svg {
+  width: 15px; height: 15px; stroke: var(--el-fresh); fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
+}
+
+/* ── Product stage ── */
+#ErvLabel-{{ section.id }} .el-stage {
+  position: relative; border-radius: 26px; overflow: hidden;
+  background: radial-gradient(120% 120% at 70% 20%, #ffffff 0%, var(--el-metal-1) 55%, var(--el-metal-2) 100%);
+  border: 1px solid var(--el-border); aspect-ratio: 1 / 0.92;
+  display: flex; align-items: center; justify-content: center;
+}
+#ErvLabel-{{ section.id }} .el-stage::before {
+  content: ''; position: absolute; width: 70%; height: 70%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,178,107,.1) 0%, transparent 70%);
+  top: 8%; right: -6%;
+}
+#ErvLabel-{{ section.id }} .el-stage-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(var(--el-metal-2) 1px,transparent 1px), linear-gradient(90deg,var(--el-metal-2) 1px,transparent 1px);
+  background-size: 46px 46px; opacity: .35;
+  -webkit-mask-image: radial-gradient(circle at center,#000 30%,transparent 75%);
+  mask-image: radial-gradient(circle at center,#000 30%,transparent 75%);
+}
+#ErvLabel-{{ section.id }} .el-stage-floater {
+  position: relative; z-index: 2; width: 86%; will-change: transform;
+}
+#ErvLabel-{{ section.id }} .el-stage-unit { display: block; width: 100%; }
+#ErvLabel-{{ section.id }} .el-stage-shadow {
+  position: absolute; bottom: 11%; left: 50%; transform: translateX(-50%);
+  width: 48%; height: 26px;
+  background: radial-gradient(ellipse, rgba(17,24,39,.16) 0%, transparent 70%);
+  filter: blur(7px); z-index: 1; will-change: transform, opacity;
+}
+#ErvLabel-{{ section.id }} .el-stage-badge {
+  position: absolute; top: 22px; left: 22px; z-index: 3;
+  background: var(--el-dark); color: #fff; border-radius: 12px; padding: 11px 15px;
+  display: flex; align-items: center; gap: 10px;
+}
+#ErvLabel-{{ section.id }} .el-sb-n { font: 800 20px/1 var(--el-head); }
+#ErvLabel-{{ section.id }} .el-sb-l { font: 500 10px/1.3 var(--el-head); color: rgba(255,255,255,.6); letter-spacing: .05em; }
+#ErvLabel-{{ section.id }} .el-stage-hint {
+  position: absolute; bottom: 18px; right: 22px; z-index: 3;
+  display: flex; align-items: center; gap: 7px;
+  font: 500 11px/1 var(--el-head); color: var(--el-muted);
+  background: rgba(255,255,255,.7); padding: 7px 12px;
+  border-radius: 100px; border: 1px solid var(--el-border);
+}
+#ErvLabel-{{ section.id }} .el-stage-hint svg {
+  width: 13px; height: 13px; stroke: var(--el-fresh); fill: none; stroke-width: 2;
+  animation: el-spin-{{ section.id }} 8s linear infinite;
+}
+@keyframes el-spin-{{ section.id }} { to { transform: rotate(360deg); } }
+
+/* ── Responsive ── */
+@media (max-width: 1000px) {
+  #ErvLabel-{{ section.id }} .el-pp-container { padding: 0 36px; }
+  #ErvLabel-{{ section.id }} .el-phero-grid { grid-template-columns: 1fr; gap: 44px; }
+  #ErvLabel-{{ section.id }} .el-stage { max-width: 460px; margin: 0 auto; }
+}
+@media (max-width: 820px) {
+  #ErvLabel-{{ section.id }} .el-phero { padding: 26px 0 70px; }
+  #ErvLabel-{{ section.id }} .el-chip-row { grid-template-columns: repeat(2,1fr) !important; }
+  #ErvLabel-{{ section.id }} .el-chip:nth-child(2) { border-right: none; }
+  #ErvLabel-{{ section.id }} .el-chip:nth-child(1), #ErvLabel-{{ section.id }} .el-chip:nth-child(2) { border-bottom: 1px solid var(--el-border); }
+  #ErvLabel-{{ section.id }} .el-vselect-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (max-width: 560px) {
+  #ErvLabel-{{ section.id }} .el-pp-container { padding: 0 22px; }
+  #ErvLabel-{{ section.id }} .el-tag { font-size: 10px; padding: 6px 11px; }
+  #ErvLabel-{{ section.id }} .el-phero-ctas { flex-direction: column; }
+  #ErvLabel-{{ section.id }} .el-phero-ctas .el-btn { width: 100%; }
+  #ErvLabel-{{ section.id }} .el-phero-trust { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+{% endstylesheet %}
+
+<script>
+(function () {
+  var sid   = '{{ section.id }}';
+  var root  = document.getElementById('ErvLabel-' + sid);
+  if (!root) return;
+
+  /* ── per-variant chip values stored as JSON in data-chips ── */
+  var stageN = root.querySelector('#el-stageBadgeN-' + sid);
+  var chipNums = root.querySelectorAll('.el-chip-num');
+
+  function flipText(el, val) {
+    if (!el || String(el.textContent) === String(val)) return;
+    el.style.transition = 'opacity .18s, transform .18s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-4px)';
+    setTimeout(function () {
+      el.textContent = val;
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    }, 160);
+  }
+
+  function applyVariant(btn) {
+    root.querySelectorAll('.el-vchip').forEach(function (c) { c.classList.remove('active'); });
+    btn.classList.add('active');
+
+    if (stageN && btn.dataset.badge) flipText(stageN, btn.dataset.badge);
+
+    /* update chip values if provided as JSON array */
+    if (btn.dataset.chips) {
+      try {
+        var vals = JSON.parse(btn.dataset.chips);
+        chipNums.forEach(function (el, i) {
+          if (vals[i] != null) flipText(el, vals[i]);
+        });
+      } catch (e) {}
+    }
+  }
+
+  root.querySelectorAll('.el-vchip').forEach(function (btn) {
+    btn.addEventListener('click', function () { applyVariant(btn); });
+  });
+
+  /* init first active chip */
+  var first = root.querySelector('.el-vchip.active');
+  if (first && first.dataset.chips) {
+    try {
+      var init = JSON.parse(first.dataset.chips);
+      chipNums.forEach(function (el, i) { if (init[i] != null) el.textContent = init[i]; });
+    } catch (e) {}
+  }
+
+  /* float animation — Web Animations API so CSS overrides can't block it */
+  var floater = root.querySelector('.el-stage-floater');
+  var shadow  = root.querySelector('.el-stage-shadow');
+  var noMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!noMotion && floater && floater.animate) {
+    floater.animate(
+      [{ transform: 'translateY(0px)' }, { transform: 'translateY(-14px)' }, { transform: 'translateY(0px)' }],
+      { duration: 6000, easing: 'ease-in-out', iterations: Infinity }
+    );
+    if (shadow) shadow.animate(
+      [
+        { transform: 'translateX(-50%) scale(1)',    opacity: '0.9'  },
+        { transform: 'translateX(-50%) scale(0.82)', opacity: '0.55' },
+        { transform: 'translateX(-50%) scale(1)',    opacity: '0.9'  }
+      ],
+      { duration: 6000, easing: 'ease-in-out', iterations: Infinity }
+    );
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "ERV Label",
+  "tag": "div",
+  "settings": [
+    { "type": "header", "content": "Badges" },
+    { "type": "text", "id": "badge_1", "label": "Badge 1", "default": "★ Flagship Energy Recovery" },
+    { "type": "text", "id": "badge_2", "label": "Badge 2", "default": "In Production · 4–6 wk lead" },
+
+    { "type": "header", "content": "Heading" },
+    { "type": "text",     "id": "heading",     "label": "Heading",     "default": "ERV Series Pro" },
+    { "type": "text",     "id": "subheading",  "label": "Sub-heading", "default": "Dual-Core Energy Recovery Ventilator" },
+    { "type": "textarea", "id": "description", "label": "Description", "default": "Recover up to 96% of the energy you'd otherwise throw away. The Series Pro pairs a counter-flow enthalpy core with whisper-quiet EC fans and CO₂-aware control — for fresh, filtered, temperature-balanced air in any building." },
+
+    { "type": "header", "content": "Capacity selector" },
+    { "type": "text",     "id": "variant_title", "label": "Title",            "default": "Choose capacity" },
+    { "type": "textarea", "id": "variant_text",  "label": "Supporting text",  "default": "Three sizes built on the same enthalpy-core platform — from single homes to large commercial floors." },
+
+    { "type": "header", "content": "Buttons" },
+    { "type": "text", "id": "button_1_text", "label": "Button 1 label", "default": "Request a Quote" },
+    { "type": "url",  "id": "button_1_link", "label": "Button 1 link" },
+    { "type": "text", "id": "button_2_text", "label": "Button 2 label", "default": "Download Datasheet" },
+    { "type": "url",  "id": "button_2_link", "label": "Button 2 link" },
+
+    { "type": "header", "content": "Product stage" },
+    { "type": "image_picker", "id": "stage_logo", "label": "Brand logo (shown inside unit illustration)" },
+    { "type": "text", "id": "stage_badge_value", "label": "Badge value",     "default": "350" },
+    { "type": "text", "id": "stage_badge_label", "label": "Badge label",     "default": "m³/h class" },
+    { "type": "text", "id": "display_value",     "label": "Display value",   "default": "96" },
+    { "type": "text", "id": "display_label",     "label": "Display sub-text","default": "RECOVERY · 22°C" },
+    { "type": "text", "id": "stage_hint_text",   "label": "Hint text",       "default": "Live energy display" }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat chip",
+      "settings": [
+        { "type": "text", "id": "value", "label": "Value",      "default": "96" },
+        { "type": "text", "id": "unit",  "label": "Unit",       "default": "%" },
+        { "type": "text", "id": "label", "label": "Label",      "default": "Heat Recovery" }
+      ]
+    },
+    {
+      "type": "variant",
+      "name": "Capacity option",
+      "settings": [
+        { "type": "text", "id": "name",        "label": "Name",                          "default": "ERV-350" },
+        { "type": "text", "id": "description", "label": "Description",                   "default": "Homes · small offices" },
+        { "type": "text", "id": "stage_value", "label": "Stage badge value on select",   "default": "350" },
+        { "type": "text", "id": "chip_values", "label": "Chip values (JSON array)",       "info": "e.g. [\"96\",\"350\",\"28\",\"F7\"] — must match stat chip order", "default": "[\"96\",\"350\",\"28\",\"F7\"]" }
+      ]
+    },
+    {
+      "type": "trust_item",
+      "name": "Trust item",
+      "settings": [
+        { "type": "text",   "id": "text", "label": "Text", "default": "7-year core warranty" },
+        {
+          "type": "select", "id": "icon", "label": "Icon", "default": "check",
+          "options": [
+            { "value": "check",  "label": "Checkmark" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "clock",  "label": "Clock" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "ERV Label",
+      "category": "Product",
+      "blocks": [
+        { "type": "stat",    "settings": { "value": "96",  "unit": "%",     "label": "Heat Recovery" } },
+        { "type": "stat",    "settings": { "value": "350", "unit": "m³/h",  "label": "Max Airflow" } },
+        { "type": "stat",    "settings": { "value": "28",  "unit": "dB",    "label": "Sound Level" } },
+        { "type": "stat",    "settings": { "value": "F7",  "unit": "",      "label": "Filter Class" } },
+        { "type": "variant", "settings": { "name": "ERV-350", "description": "Homes · small offices",   "stage_value": "350", "chip_values": "[\"96\",\"350\",\"28\",\"F7\"]" } },
+        { "type": "variant", "settings": { "name": "ERV-500", "description": "Floors · clinics",        "stage_value": "500", "chip_values": "[\"95\",\"500\",\"31\",\"F7\"]" } },
+        { "type": "variant", "settings": { "name": "ERV-800", "description": "Commercial · large",      "stage_value": "800", "chip_values": "[\"94\",\"800\",\"34\",\"F9\"]" } },
+        { "type": "trust_item", "settings": { "text": "7-year core warranty",   "icon": "check" } },
+        { "type": "trust_item", "settings": { "text": "ISO 16890 certified",    "icon": "shield" } },
+        { "type": "trust_item", "settings": { "text": "Eurovent rated",         "icon": "clock" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

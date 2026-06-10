@@ -1,0 +1,46 @@
+{%- comment -%}
+  HOW TO USE:
+  1. Upload your .woff2 file: Shopify Admin → Content → Files
+  2. Copy the CDN URL Shopify gives you and paste it in font_url below
+  3. Change font_family to your font's name
+  4. In layout/theme.liquid, add this line inside <head>:
+        {%- render 'custom-fonts' -%}
+     Place it after:  {%- render 'fonts' -%}
+{%- endcomment -%}
+
+{%- assign font_family = 'WTAugusteSerif-Regular' -%}
+{%- assign font_url    = 'https://cdn.shopify.com/s/files/1/0796/0543/2343/files/WTAugusteSerif-Regular.woff?v=1778230359' -%}
+{%- assign font_family2 = 'MatterRegular' -%}
+{%- assign font2_url    = 'https://cdn.shopify.com/s/files/1/0796/0543/2343/files/MatterRegular.woff?v=1778231607' -%}
+
+<style>
+  @font-face {
+    font-family: '{{ font_family }}';
+    src: url('{{ font_url }}') format('woff');
+    font-weight: 700;
+    font-display: swap;
+  }
+    @font-face {
+    font-family: '{{ font_family }}';
+    src: url('{{ font2_url }}') format('woff');
+    font-weight: 700;
+    font-display: swap;
+  }
+
+  /* ── Apply to body text ── */
+  body {
+    font-family: '{{ font_family2 }}', MatterRegular;
+  }
+
+  /* ── Apply to headings ── */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: '{{ font_family }}', WTAugusteSerif-Regular;
+  }
+
+  /* ── Apply to buttons ── */
+  button,
+  .button,
+  input[type='submit'] {
+    font-family: '{{ font_family2 }}', WTAugusteSerif-Regular;
+  }
+</style>

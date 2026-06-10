@@ -1,0 +1,376 @@
+<section
+  id="InvisibleProblem-{{ section.id }}"
+  class="ip-section"
+>
+  <div class="ip-container page-width">
+
+    <div class="ip-head" data-reveal>
+      <p class="ip-eyebrow eyebrow">{{ section.settings.eyebrow }}</p>
+      <h2 class="ip-h2 h2">
+        {{ section.settings.title }}
+        <span class="ip-gradient text-gradient">{{ section.settings.title_accent }}</span>
+      </h2>
+      <p class="ip-lede lede">{{ section.settings.body }}</p>
+    </div>
+
+    <div class="ip-grid">
+      {%- for block in section.blocks -%}
+        {%- assign indoor_val = block.settings.indoor | times: 1.0 -%}
+        {%- assign outdoor_val = block.settings.outdoor | times: 1.0 -%}
+        {%- assign ratio = outdoor_val | divided_by: indoor_val | times: 100 -%}
+        <div class="ip-poll" data-reveal {{ block.shopify_attributes }}>
+          <div class="ip-poll__head">
+            <span class="ip-poll__key">{{ block.settings.key }}</span>
+            <span class="ip-poll__unit">{{ block.settings.unit }}</span>
+          </div>
+          <div class="ip-poll__bars">
+            <div>
+              <div class="ip-poll__row">
+                <span>Indoor</span>
+                <span class="ip-mono mono">{{ block.settings.indoor }} {{ block.settings.unit }}</span>
+              </div>
+              <div class="ip-bar">
+                <div class="ip-bar__fill ip-bar__fill--warn" data-bar-fill="100"></div>
+              </div>
+            </div>
+            <div>
+              <div class="ip-poll__row">
+                <span>Outdoor</span>
+                <span class="ip-mono mono">{{ block.settings.outdoor }} {{ block.settings.unit }}</span>
+              </div>
+              <div class="ip-bar">
+                <div class="ip-bar__fill ip-bar__fill--ok" data-bar-fill="{{ ratio }}"></div>
+              </div>
+            </div>
+          </div>
+          <p class="ip-poll__note">{{ block.settings.note }}</p>
+        </div>
+      {%- endfor -%}
+    </div>
+
+
+  </div>
+</section>
+
+{% stylesheet %}
+  .ip-section {
+    padding: 6rem 0;
+    background: #ffffff;
+    overflow-x: clip;
+  }
+
+  .ip-container {
+    /* page-width handles max-width + centering */
+  }
+
+  /* Section header */
+  .ip-head {
+    max-width: 48rem;
+    margin-bottom: 3rem;
+  }
+
+  .ip-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #0E7A43;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .ip-h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #111827;
+    margin: 0 0 1rem 0;
+  }
+
+  .ip-gradient {
+    background: linear-gradient(135deg, #0E7A43 0%, #00B26B 55%, #A7F432 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .ip-lede {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #6B7280;
+    max-width: 42rem;
+    margin: 0;
+  }
+
+  /* Grid */
+  .ip-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @media screen and (max-width: 639px) {
+    .ip-section {
+      padding: 4rem 0;
+    }
+
+    .ip-grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      padding-bottom: 1rem;
+      margin-inline: calc(var(--page-margin, 16px) * -1);
+      padding-inline: var(--page-margin, 16px);
+      scroll-padding-inline: var(--page-margin, 16px);
+      scrollbar-width: none;
+      max-width: 100%;
+    }
+    .ip-grid::-webkit-scrollbar { display: none; }
+    .ip-poll {
+      flex: 0 0 min(85vw, 20rem);
+      scroll-snap-align: start;
+    }
+  }
+
+  /* Pollutant card */
+  .ip-poll {
+    height: 100%;
+    border: 1px solid #E5E7EB;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(14, 122, 67, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .ip-poll:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 40px -10px rgba(14, 122, 67, 0.35);
+  }
+
+  .ip-poll__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ip-poll__key {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #111827;
+  }
+
+  .ip-poll__unit {
+    background: #F5F7F6;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6B7280;
+  }
+
+  .ip-poll__bars {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .ip-poll__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #6B7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .ip-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+  }
+
+  .ip-poll__note {
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    color: #6B7280;
+    margin-bottom: 0;
+  }
+
+  /* Bars */
+  .ip-bar {
+    height: 6px;
+    background: #F5F7F6;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .ip-bar__fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ip-bar__fill--warn {
+    background: linear-gradient(to right, #FBBF24, #F43F5E);
+  }
+
+  .ip-bar__fill--ok {
+    background: linear-gradient(135deg, #0E7A43, #00B26B, #A7F432);
+  }
+
+  /* Reveal animation */
+  #InvisibleProblem-{{ section.id }} [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  #InvisibleProblem-{{ section.id }} [data-reveal].ip-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Responsive */
+  @media screen and (min-width: 640px) {
+    .ip-section {
+      padding: 8rem 0;
+    }
+    .ip-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .ip-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('InvisibleProblem-{{ section.id }}');
+    if (!root) return;
+
+    // Reveal animation
+    if ('IntersectionObserver' in window) {
+      var revealObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e, i) {
+          if (e.isIntersecting) {
+            e.target.classList.add('ip-visible');
+            revealObs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      root.querySelectorAll('[data-reveal]').forEach(function (el, i) {
+        el.style.transitionDelay = Math.min(i, 6) * 80 + 'ms';
+        revealObs.observe(el);
+      });
+    } else {
+      root.querySelectorAll('[data-reveal]').forEach(function (el) {
+        el.classList.add('ip-visible');
+      });
+    }
+
+    // Bar fill animation
+    if ('IntersectionObserver' in window) {
+      var barObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            var pct = parseFloat(e.target.getAttribute('data-bar-fill')) || 0;
+            e.target.style.width = Math.min(100, pct) + '%';
+            barObs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.4 });
+
+      root.querySelectorAll('[data-bar-fill]').forEach(function (el) {
+        barObs.observe(el);
+      });
+    } else {
+      root.querySelectorAll('[data-bar-fill]').forEach(function (el) {
+        var pct = parseFloat(el.getAttribute('data-bar-fill')) || 0;
+        el.style.width = Math.min(100, pct) + '%';
+      });
+    }
+
+    // Re-init on Shopify editor reload
+    document.addEventListener('shopify:section:load', function (e) {
+      if (e.detail.sectionId === '{{ section.id }}') {
+        root.querySelectorAll('[data-reveal]').forEach(function (el) {
+          el.classList.add('ip-visible');
+        });
+        root.querySelectorAll('[data-bar-fill]').forEach(function (el) {
+          var pct = parseFloat(el.getAttribute('data-bar-fill')) || 0;
+          el.style.width = Math.min(100, pct) + '%';
+        });
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Invisible Problem",
+  "tag": "section",
+  "class": "invisible-problem-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "The Invisible Indoor Problem"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "The air you can't see may be"
+    },
+    {
+      "type": "text",
+      "id": "title_accent",
+      "label": "Heading accent (gradient)",
+      "default": "affecting your health."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Description",
+      "default": "Indoor air is often 2–5× more polluted than outdoor air. Astberg's intelligent ventilation systems continuously monitor and exchange stale, contaminated air with filtered fresh air — without losing the energy you've already paid for."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pollutant",
+      "name": "Pollutant",
+      "settings": [
+        { "type": "text",   "id": "key",     "label": "Pollutant name", "default": "CO₂" },
+        { "type": "text",   "id": "unit",    "label": "Unit",           "default": "ppm" },
+        { "type": "number", "id": "indoor",  "label": "Indoor value",   "default": 1200 },
+        { "type": "number", "id": "outdoor", "label": "Outdoor value",  "default": 410 },
+        { "type": "text",   "id": "note",    "label": "Note",           "default": "Cognitive impact above 1000 ppm" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Invisible Problem",
+      "category": "Content",
+      "blocks": [
+        { "type": "pollutant", "settings": { "key": "CO₂",   "unit": "ppm",   "indoor": 1200, "outdoor": 410, "note": "Cognitive impact above 1000 ppm" } },
+        { "type": "pollutant", "settings": { "key": "PM2.5", "unit": "µg/m³", "indoor": 85,   "outdoor": 35,  "note": "Penetrates deep into the lungs" } },
+        { "type": "pollutant", "settings": { "key": "PM10",  "unit": "µg/m³", "indoor": 140,  "outdoor": 60,  "note": "Irritates respiratory tract" } },
+        { "type": "pollutant", "settings": { "key": "VOC",   "unit": "ppm",   "indoor": 1,    "outdoor": 0,   "note": "Off-gassed from furniture, paints" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

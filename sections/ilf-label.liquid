@@ -1,0 +1,305 @@
+<div id="IlfLabel-{{ section.id }}">
+  <section class="ilf-section">
+    <div class="ilf-container">
+      <div class="ilf-grid">
+
+        <!-- ══ LEFT ══ -->
+        <div class="ilf-left">
+
+          <div class="ilf-badges">
+            {% if section.settings.badge_1 != blank %}
+              <span class="ilf-tag ilf-tag-flag">◆ {{ section.settings.badge_1 }}</span>
+            {% endif %}
+            {% if section.settings.badge_2 != blank %}
+              <span class="ilf-tag ilf-tag-stock">
+                <span class="ilf-b-dot"></span>{{ section.settings.badge_2 }}
+              </span>
+            {% endif %}
+          </div>
+
+          {% if section.settings.title != blank %}
+            <h1 class="ilf-title">{{ section.settings.title }}</h1>
+          {% endif %}
+          {% if section.settings.model != blank %}
+            <div class="ilf-model">{{ section.settings.model }}</div>
+          {% endif %}
+          {% if section.settings.description != blank %}
+            <p class="ilf-desc">{{ section.settings.description }}</p>
+          {% endif %}
+
+        </div><!-- /ilf-left -->
+
+        <!-- ══ RIGHT (stage) ══ -->
+        <div class="ilf-right">
+          <div class="ilf-stage">
+            <div class="ilf-stage-grid" aria-hidden="true"></div>
+
+            <div class="ilf-stage-badge">
+              <div class="ilf-sb-n">Ø{{ section.settings.duct_size | default: '160' }}</div>
+              <div class="ilf-sb-l">{{ section.settings.duct_size | default: '160' }} mm duct</div>
+            </div>
+
+            <div class="ilf-stage-floater">
+              <svg class="ilf-stage-unit" viewBox="0 0 460 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="ilf-body-{{ section.id }}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fbfcfc"/><stop offset="50%" stop-color="#eef2f3"/><stop offset="100%" stop-color="#d4dcde"/>
+                  </linearGradient>
+                  <linearGradient id="ilf-ring-{{ section.id }}" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ffffff"/><stop offset="55%" stop-color="#e7ecee"/><stop offset="100%" stop-color="#c9d2d5"/>
+                  </linearGradient>
+                  <radialGradient id="ilf-bore-{{ section.id }}" cx="42%" cy="38%" r="72%">
+                    <stop offset="0%" stop-color="#2a3742"/><stop offset="60%" stop-color="#16212a"/><stop offset="100%" stop-color="#0a1117"/>
+                  </radialGradient>
+                  <linearGradient id="ilf-spig-{{ section.id }}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#dfe5e7"/><stop offset="100%" stop-color="#b3bdc0"/>
+                  </linearGradient>
+                  <linearGradient id="ilf-blade-{{ section.id }}" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#1bc77d"/><stop offset="100%" stop-color="#0e7a43"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- airflow arrows -->
+                <g stroke="#00B26B" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".55">
+                  <path d="M44 150 q26 6 50 0"/>
+                  <path d="M40 188 q30 7 58 0"/>
+                  <path d="M44 226 q26 6 50 0"/>
+                </g>
+
+                <!-- rear outlet spigot -->
+                <ellipse cx="378" cy="210" rx="30" ry="92" fill="url(#ilf-spig-{{ section.id }})" stroke="#bcc6c9" stroke-width="1.5"/>
+                <rect x="378" y="118" width="46" height="184" fill="url(#ilf-spig-{{ section.id }})"/>
+                <ellipse cx="424" cy="210" rx="14" ry="90" fill="#cdd5d8" stroke="#bcc6c9" stroke-width="1.5"/>
+                <ellipse cx="424" cy="210" rx="9" ry="74" fill="#aab4b7"/>
+
+                <!-- cylindrical body band -->
+                <path d="M150 112 L378 120 L378 300 L150 308 Z" fill="url(#ilf-body-{{ section.id }})" stroke="#cfd6d8" stroke-width="1.5"/>
+
+                <!-- terminal / junction box -->
+                <rect x="236" y="78" width="78" height="36" rx="7" fill="#eef2f3" stroke="#cfd6d8" stroke-width="1.5"/>
+                <rect x="248" y="88" width="34" height="16" rx="3" fill="#16212a"/>
+                <circle cx="298" cy="96" r="3.4" fill="#A7F432"/>
+                <path d="M275 78 q4 -16 18 -20 q14 -3 22 6" stroke="#aab4b7" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+                <!-- Astberg decal -->
+                <g transform="translate(196 168)">
+                  {% if section.settings.stage_logo != blank %}
+                    <image href="{{ section.settings.stage_logo | image_url: width: 40 }}" x="0" y="0" width="18" height="18"/>
+                  {% else %}
+                    <image href="{{ 'astberg-logo-updated.png' | asset_url }}" x="0" y="0" width="18" height="18"/>
+                  {% endif %}
+                  <text x="24" y="8" font-family="sans-serif" font-size="12" font-weight="800" letter-spacing="2" fill="#374151">ASTBERG</text>
+                  <text x="24" y="18" font-family="sans-serif" font-size="5.6" font-weight="500" letter-spacing="3" fill="#9aa6aa">VENTILATION</text>
+                </g>
+                <g stroke="#c5cdd0" stroke-width="2.2" stroke-linecap="round" opacity=".7">
+                  <path d="M196 206h150"/>
+                  <path d="M196 220h150"/>
+                  <path d="M196 234h150"/>
+                </g>
+
+                <!-- front intake flange -->
+                <circle cx="150" cy="210" r="100" fill="url(#ilf-ring-{{ section.id }})" stroke="#cfd6d8" stroke-width="1.5"/>
+                <circle cx="150" cy="210" r="100" fill="none" stroke="#ffffff" stroke-width="1" opacity=".7"/>
+                <circle cx="150" cy="210" r="88" fill="#dfe5e7" stroke="#c2cbce" stroke-width="1.3"/>
+                <g fill="#aab4b7">
+                  <circle cx="150" cy="124" r="3.4"/><circle cx="150" cy="296" r="3.4"/>
+                  <circle cx="64"  cy="210" r="3.4"/><circle cx="236" cy="210" r="3.4"/>
+                  <circle cx="89"  cy="149" r="3"/><circle cx="211" cy="149" r="3"/>
+                  <circle cx="89"  cy="271" r="3"/><circle cx="211" cy="271" r="3"/>
+                </g>
+                <!-- bore -->
+                <circle cx="150" cy="210" r="80" fill="url(#ilf-bore-{{ section.id }})"/>
+                <!-- mixed-flow impeller -->
+                <g transform="translate(150 210)">
+                  <g fill="url(#ilf-blade-{{ section.id }})" opacity=".9" stroke="#0a3f24" stroke-width="1">
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z"/>
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z" transform="rotate(51)"/>
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z" transform="rotate(102)"/>
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z" transform="rotate(153)"/>
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z" transform="rotate(204)"/>
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z" transform="rotate(255)"/>
+                    <path d="M0 -70 Q30 -30 0 0 Q-30 -30 0 -70Z" transform="rotate(306)"/>
+                  </g>
+                  <circle r="22" fill="#1a2730" stroke="#0a1117" stroke-width="1.5"/>
+                  <circle r="22" fill="none" stroke="#3a4a55" stroke-width="1" opacity=".6"/>
+                  <circle r="6" fill="#A7F432"/>
+                </g>
+
+                <!-- mounting feet -->
+                <path d="M196 308 l-8 26 h22 l-4 -22 Z" fill="#b9c2c5" stroke="#a3adb0" stroke-width="1"/>
+                <rect x="178" y="332" width="42" height="9" rx="3" fill="#aab4b7"/>
+                <path d="M330 304 l-6 26 h22 l-2 -23 Z" fill="#aeb8bb" stroke="#9aa4a7" stroke-width="1"/>
+                <rect x="312" y="328" width="42" height="9" rx="3" fill="#9fa9ac"/>
+              </svg>
+            </div>
+
+            <div class="ilf-stage-shadow"></div>
+
+            <div class="ilf-stage-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><path d="M21 3v6h-6"/></svg>
+              Mixed-flow impeller
+            </div>
+          </div>
+        </div><!-- /ilf-right -->
+
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+#IlfLabel-{{ section.id }} *,
+#IlfLabel-{{ section.id }} *::before,
+#IlfLabel-{{ section.id }} *::after { box-sizing: border-box; }
+
+/* ── Section & container ── */
+#IlfLabel-{{ section.id }} .ilf-section { background: #fff; padding: 72px 0 96px; }
+#IlfLabel-{{ section.id }} .ilf-container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+/* ── Two-column grid ── */
+#IlfLabel-{{ section.id }} .ilf-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 72px; align-items: center;
+}
+
+/* ── Badges ── */
+#IlfLabel-{{ section.id }} .ilf-badges {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+#IlfLabel-{{ section.id }} .ilf-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; letter-spacing: .05em;
+  padding: 5px 12px; border-radius: 100px; white-space: nowrap;
+}
+#IlfLabel-{{ section.id }} .ilf-tag-flag { background: #111827; color: #fff; }
+#IlfLabel-{{ section.id }} .ilf-tag-stock {
+  border: 1px solid rgba(0,178,107,.35); color: #0E7A43; background: transparent;
+}
+
+/* ── Pulsing dot ── */
+#IlfLabel-{{ section.id }} .ilf-b-dot {
+  width: 7px; height: 7px; background: #00B26B; border-radius: 50%;
+  display: inline-block; flex-shrink: 0; will-change: opacity, transform;
+  animation: ilf-dot-{{ section.id }} 2s ease-in-out infinite;
+}
+@keyframes ilf-dot-{{ section.id }} {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .3; transform: scale(.65); }
+}
+
+/* ── Title / model / desc ── */
+#IlfLabel-{{ section.id }} .ilf-title {
+  font-size: clamp(28px, 4vw, 52px); font-weight: 700; line-height: 1.08;
+  letter-spacing: -.03em; color: #111827; margin: 0 0 10px;
+}
+#IlfLabel-{{ section.id }} .ilf-model {
+  font-size: 11px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: #0E7A43; margin-bottom: 18px;
+}
+#IlfLabel-{{ section.id }} .ilf-desc {
+  font-size: 15px; line-height: 1.7; color: #4B5563; margin: 0; max-width: 480px;
+}
+
+/* ══ STAGE ══ */
+#IlfLabel-{{ section.id }} .ilf-stage {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #f3f5f6 0%, #eef2f3 60%, #e4eaec 100%);
+  border-radius: 24px; padding: 32px 16px 72px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; min-height: 480px;
+}
+#IlfLabel-{{ section.id }} .ilf-stage-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0,0,0,.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+#IlfLabel-{{ section.id }} .ilf-stage-badge {
+  position: absolute; top: 18px; left: 18px; z-index: 3;
+  background: #111827; border-radius: 10px; padding: 9px 14px;
+}
+#IlfLabel-{{ section.id }} .ilf-sb-n {
+  font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -.02em; line-height: 1.1;
+}
+#IlfLabel-{{ section.id }} .ilf-sb-l {
+  font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; line-height: 1;
+}
+#IlfLabel-{{ section.id }} .ilf-stage-floater {
+  position: relative; z-index: 2; width: 92%; will-change: transform;
+}
+#IlfLabel-{{ section.id }} .ilf-stage-unit { display: block; width: 100%; }
+#IlfLabel-{{ section.id }} .ilf-stage-shadow {
+  position: absolute; bottom: 9%; left: 50%; transform: translateX(-50%);
+  width: 52%; height: 28px;
+  background: radial-gradient(ellipse, rgba(17,24,39,.14) 0%, transparent 70%);
+  filter: blur(8px); z-index: 1; will-change: transform, opacity;
+}
+#IlfLabel-{{ section.id }} .ilf-stage-hint {
+  position: absolute; bottom: 16px; right: 16px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: #9CA3AF; font-weight: 500;
+  background: rgba(255,255,255,.82); backdrop-filter: blur(6px);
+  border: 1px solid rgba(0,0,0,.07); border-radius: 20px; padding: 6px 12px;
+}
+#IlfLabel-{{ section.id }} .ilf-stage-hint svg {
+  width: 13px; height: 13px; stroke: #9CA3AF; flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1023px) {
+  #IlfLabel-{{ section.id }} .ilf-grid { grid-template-columns: 1fr; gap: 48px; }
+  #IlfLabel-{{ section.id }} .ilf-right { order: -1; }
+  #IlfLabel-{{ section.id }} .ilf-stage { min-height: 400px; }
+}
+@media (max-width: 639px) {
+  #IlfLabel-{{ section.id }} .ilf-section { padding: 48px 0 64px; }
+  #IlfLabel-{{ section.id }} .ilf-container { padding: 0 16px; }
+  #IlfLabel-{{ section.id }} .ilf-title { font-size: 28px; }
+  #IlfLabel-{{ section.id }} .ilf-stage { min-height: 300px; padding-bottom: 56px; }
+}
+{% endstylesheet %}
+
+<script>
+(function () {
+  var sid  = '{{ section.id }}';
+  var root = document.getElementById('IlfLabel-' + sid);
+  if (!root) return;
+
+  var floater  = root.querySelector('.ilf-stage-floater');
+  var shadow   = root.querySelector('.ilf-stage-shadow');
+  var noMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!noMotion && floater && floater.animate) {
+    floater.animate(
+      [{ transform: 'translateY(0px)' }, { transform: 'translateY(-12px)' }, { transform: 'translateY(0px)' }],
+      { duration: 6000, easing: 'ease-in-out', iterations: Infinity }
+    );
+    if (shadow) shadow.animate(
+      [
+        { transform: 'translateX(-50%) scale(1)',    opacity: '0.9' },
+        { transform: 'translateX(-50%) scale(0.84)', opacity: '0.5' },
+        { transform: 'translateX(-50%) scale(1)',    opacity: '0.9' }
+      ],
+      { duration: 6000, easing: 'ease-in-out', iterations: Infinity }
+    );
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "ILF Label",
+  "tag": "div",
+  "settings": [
+    { "type": "image_picker", "id": "stage_logo",  "label": "Brand logo (inside illustration)" },
+    { "type": "text",         "id": "duct_size",   "label": "Duct size shown in badge", "default": "160" },
+    { "type": "text",         "id": "badge_1",     "label": "Badge — category",  "default": "Mixed-Flow Duct Fan" },
+    { "type": "text",         "id": "badge_2",     "label": "Badge — stock",     "default": "In Stock · ships in 3–5 days" },
+    { "type": "text",         "id": "title",       "label": "Product title",     "default": "AeroLine Inline Fan" },
+    { "type": "text",         "id": "model",       "label": "Model subtitle",    "default": "Mixed-Flow EC Duct Fan" },
+    { "type": "textarea",     "id": "description", "label": "Description",       "default": "The pressure of a centrifugal fan, the volume of an axial, in a body that drops straight into the duct. EC-driven, infinitely variable and quiet enough to forget it's running." }
+  ],
+  "presets": [
+    { "name": "ILF Label", "category": "Product" }
+  ]
+}
+{% endschema %}

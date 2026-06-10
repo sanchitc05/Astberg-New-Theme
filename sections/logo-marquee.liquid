@@ -1,0 +1,258 @@
+
+
+<script
+  src="{{ 'marquee.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% liquid
+  assign section_settings = section.settings
+  assign gap_between_logos = section_settings.gap_between_logos
+%}
+
+<div class="section-background color-{{ section_settings.color_scheme }}"></div>
+
+<div
+  class="logo-marquee-section spacing-style color-{{ section_settings.color_scheme }}"
+  style="{% render 'spacing-style', settings: section_settings %}"
+  {{ section.shopify_attributes }}
+>
+  {%- if section_settings.heading != blank -%}
+    <p class="logo-marquee-section__eyebrow">{{ section_settings.heading | escape }}</p>
+  {%- endif -%}
+
+  <div class="logo-marquee-section__track">
+    {%- if section_settings.fade_edges -%}
+      <div class="logo-marquee-section__fade logo-marquee-section__fade--left" aria-hidden="true"></div>
+      <div class="logo-marquee-section__fade logo-marquee-section__fade--right" aria-hidden="true"></div>
+    {%- endif -%}
+
+    <marquee-component
+      class="gap-style"
+      style="
+        {% render 'gap-style', value: gap_between_logos, name: 'marquee-gap' %}
+        --marquee-direction: {{ section_settings.movement_direction }};
+        --logo-marquee-height: {{ section_settings.logo_height }}px;
+      "
+      data-speed-factor="{{ section_settings.speed }}"
+    >
+      <div class="marquee__wrapper" ref="wrapper">
+        <div class="marquee__content" ref="content">
+          <div class="marquee__repeated-items logo-marquee-section__items" ref="marqueeItems[]">
+            {% content_for 'blocks' %}
+          </div>
+        </div>
+      </div>
+    </marquee-component>
+  </div>
+</div>
+
+{% stylesheet %}
+  .logo-marquee-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .logo-marquee-section__eyebrow {
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    margin: 0;
+  }
+
+  .logo-marquee-section__track {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .logo-marquee-section__fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .logo-marquee-section__fade--left {
+    left: 0;
+    background: linear-gradient(to right, var(--color-background), transparent);
+  }
+
+  .logo-marquee-section__fade--right {
+    right: 0;
+    background: linear-gradient(to left, var(--color-background), transparent);
+  }
+
+  .logo-marquee-section__items {
+    display: flex;
+    align-items: center;
+  }
+
+  marquee-component {
+    display: block;
+    width: 100%;
+  }
+
+  .marquee__wrapper {
+    display: flex;
+    gap: var(--marquee-gap);
+    width: fit-content;
+    white-space: nowrap;
+  }
+
+  .marquee__content {
+    min-width: max-content;
+    display: flex;
+    gap: var(--marquee-gap);
+  }
+
+  .marquee__repeated-items {
+    min-width: max-content;
+    display: flex;
+    gap: var(--marquee-gap);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .marquee__repeated-items > * {
+    align-content: center;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    marquee-component:not([data-disabled]) .marquee__wrapper {
+      animation: marquee-motion var(--marquee-speed) linear infinite var(--marquee-direction);
+    }
+  }
+
+  @keyframes marquee-motion {
+    to {
+      transform: translate3d(calc(-50% - (var(--marquee-gap) / 2)), 0, 0);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Logo marquee",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "blocks": [
+    {
+      "type": "brand-logo"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:settings.heading",
+      "placeholder": "Trusted by"
+    },
+    {
+      "type": "select",
+      "id": "movement_direction",
+      "label": "t:settings.motion_direction",
+      "options": [
+        {
+          "value": "reverse",
+          "label": "t:options.forward"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.reverse"
+        }
+      ],
+      "default": "reverse"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Speed",
+      "min": 5,
+      "max": 80,
+      "step": 5,
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "label": "Logo height",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "gap_between_logos",
+      "label": "t:settings.gap",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "checkbox",
+      "id": "fade_edges",
+      "label": "Fade edges",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Logo marquee",
+      "category": "t:categories.storytelling",
+      "blocks": {
+        "logo1": { "type": "brand-logo" },
+        "logo2": { "type": "brand-logo" },
+        "logo3": { "type": "brand-logo" },
+        "logo4": { "type": "brand-logo" },
+        "logo5": { "type": "brand-logo" }
+      },
+      "block_order": ["logo1", "logo2", "logo3", "logo4", "logo5"]
+    }
+  ]
+}
+{% endschema %}

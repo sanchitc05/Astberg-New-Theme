@@ -1,0 +1,483 @@
+{%- assign sid = 'tz-' | append: section.id -%}
+
+<style>
+  /* ── Remove default section padding from Shopify wrapper ── */
+  #shopify-section-{{ section.id }} {
+    padding: 0 !important;
+  }
+
+  /* ── Root container ── */
+  #{{ sid }} {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: {{ section.settings.background_color }};
+    --tz-progress: 0;
+  }
+
+  /* ── Media wrapper — scales from 0 to 1 driven by --tz-progress ── */
+  #{{ sid }} .tz-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    transform: scale(var(--tz-progress));
+  }
+
+  #{{ sid }} .tz-media__layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  #{{ sid }} .tz-media__layer img,
+  #{{ sid }} .tz-media__layer .tz-placeholder {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  #{{ sid }} .tz-placeholder {
+    background: linear-gradient(135deg, #111, #1a1a2e);
+  }
+
+  /* Front layers start blurred; GSAP un-blurs on scroll */
+  #{{ sid }} .tz-media__front {
+    filter: blur(2px);
+  }
+
+  /* Circular mask — creates the telescope lens ring silhouette */
+  #{{ sid }} .tz-media__front img {
+    -webkit-mask-image: radial-gradient(circle at center, black 48%, transparent 50.5%);
+    mask-image: radial-gradient(circle at center, black 48%, transparent 50.5%);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+
+  /* Each ring starts at its own scale; GSAP animates all to scale(1) on scroll */
+  #{{ sid }} .tz-front-1 { transform: scale(1); }
+  #{{ sid }} .tz-front-2 { transform: scale(0.85); }
+  #{{ sid }} .tz-front-3 { transform: scale(0.6); }
+  #{{ sid }} .tz-front-4 { transform: scale(0.45); }
+  #{{ sid }} .tz-front-5 { transform: scale(0.3); }
+  #{{ sid }} .tz-front-6 { transform: scale(0.15); }
+
+  /* ── Heading — splits left/right as --tz-progress increases ── */
+  #{{ sid }} .tz-heading {
+    position: relative;
+    z-index: 3;
+    margin: 0;
+    font-size: clamp(1.5rem, {{ section.settings.heading_size }}vw, 9rem);
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    {% if section.settings.text_uppercase %}text-transform: uppercase;{% endif %}
+    display: flex;
+    gap: 0.35em;
+    transform: translateY(-15%);
+    pointer-events: none;
+    white-space: nowrap;
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.6);
+    font-family: var(--font-primary);
+  }
+
+  #{{ sid }} .tz-heading__left {
+    display: inline-block;
+    transform: translate3d(calc(var(--tz-progress) * (-66vw + 100%) - 0.5vw), 0, 0);
+  }
+
+  #{{ sid }} .tz-heading__right {
+    display: inline-block;
+    transform: translate3d(calc(var(--tz-progress) * (66vw - 100%)), 0, 0);
+  }
+
+  @media (max-width: 768px) {
+    #{{ sid }} .tz-heading {
+      font-size: {{ section.settings.heading_size_mobile }}vw;
+      white-space: normal;
+      text-align: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #{{ sid }} .tz-heading__left {
+      transform: translate3d(calc(var(--tz-progress) * (-100vw + 100%) - 0.5vw), 0, 0);
+    }
+
+    #{{ sid }} .tz-heading__right {
+      transform: translate3d(calc(var(--tz-progress) * (100vw - 100%)), 0, 0);
+    }
+  }
+
+  /* ── Scattered small images — fly toward viewer in 3D on scroll ── */
+  #{{ sid }} .tz-images {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 100vh;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  #{{ sid }} .tz-img {
+    position: absolute;
+    width: 10vw;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  #{{ sid }} .tz-img img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  #{{ sid }} .tz-img .tz-placeholder {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(135deg, #222, #333);
+    border-radius: 4px;
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    #{{ sid }} .tz-img { width: 22vw; }
+  }
+
+  /* Scatter positions — up to 10 blocks, matching original layout */
+  #{{ sid }} .tz-img:nth-child(1)  { top: 15vw; left: -3vw; }
+  #{{ sid }} .tz-img:nth-child(2)  { top: 5vw; left: 20vw; }
+  #{{ sid }} .tz-img:nth-child(3)  { top: 8vw; left: 26.5vw; }
+  #{{ sid }} .tz-img:nth-child(4)  { top: 18vw; right: 18vw; }
+  #{{ sid }} .tz-img:nth-child(5)  { top: 5vw; right: 10vw; }
+  #{{ sid }} .tz-img:nth-child(6)  { bottom: 5vw; left: 10vw; }
+  #{{ sid }} .tz-img:nth-child(7)  { bottom: 8vw; left: 22.5vw; }
+  #{{ sid }} .tz-img:nth-child(8)  { bottom: 3vw; left: 45vw; }
+  #{{ sid }} .tz-img:nth-child(9)  { bottom: 5vw; right: 15vw; }
+  #{{ sid }} .tz-img:nth-child(10) { bottom: 9vw; right: 7vw; }
+
+  @media (max-width: 768px) {
+    #{{ sid }} .tz-img:nth-child(3)  { top: 30vw; left: 30vw; }
+    #{{ sid }} .tz-img:nth-child(4)  { right: 15vw; top: 30vw; }
+    #{{ sid }} .tz-img:nth-child(5)  { top: 10vw; right: 5vw; }
+    #{{ sid }} .tz-img:nth-child(6)  { left: 5vw; }
+    #{{ sid }} .tz-img:nth-child(7)  { left: 10vw; bottom: 27.5vw; }
+    #{{ sid }} .tz-img:nth-child(8)  { bottom: 10vw; left: 35vw; }
+    #{{ sid }} .tz-img:nth-child(9)  { bottom: 5vw; }
+    #{{ sid }} .tz-img:nth-child(10) { right: 3vw; bottom: 22vw; }
+  }
+</style>
+
+<section id="{{ sid }}" style="grid-column: 1 / -1;">
+
+  <!-- ── Background + lens ring layers ── -->
+  <div class="tz-media">
+
+    <!-- Back layer: full image, no mask -->
+    <div class="tz-media__layer">
+      {%- if section.settings.main_image != blank -%}
+        {{
+          section.settings.main_image
+          | image_url: width: 2000
+          | image_tag:
+            loading: 'eager',
+            widths: '800, 1200, 1600, 2000',
+            sizes: '100vw',
+            alt: section.settings.text_right
+        }}
+      {%- else -%}
+        <div class="tz-placeholder"></div>
+      {%- endif -%}
+    </div>
+
+    <!-- 6 front layers — concentric rings that converge to the full image on scroll -->
+    {%- for i in (1..6) -%}
+      <div class="tz-media__layer tz-media__front tz-front-{{ i }}">
+        {%- if section.settings.main_image != blank -%}
+          {{
+            section.settings.main_image
+            | image_url: width: 2000
+            | image_tag:
+              loading: 'eager',
+              widths: '800, 1200, 1600, 2000',
+              sizes: '100vw',
+              alt: ''
+          }}
+        {%- else -%}
+          <div class="tz-placeholder"></div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+
+  </div>
+
+  <!-- ── Heading — splits apart as you scroll ── -->
+  <{{ section.settings.heading_tag }} class="tz-heading">
+    <span class="tz-heading__left">{{ section.settings.text_left | escape }}</span>
+    <span class="tz-heading__right">{{ section.settings.text_right | escape }}</span>
+  </{{ section.settings.heading_tag }}>
+
+  <!-- ── Scattered small images ── -->
+  {%- if section.blocks.size > 0 -%}
+    <div class="tz-images">
+      {%- for block in section.blocks -%}
+        <div class="tz-img" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            {{
+              block.settings.image
+              | image_url: width: 400
+              | image_tag:
+                loading: 'lazy',
+                widths: '200, 300, 400',
+                sizes: '(max-width: 768px) 22vw, 10vw',
+                alt: ''
+            }}
+          {%- else -%}
+            <div class="tz-placeholder"></div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+</section>
+
+<script>
+(function () {
+  var SID          = '{{ sid }}';
+  var SCROLL_END   = '{{ section.settings.scroll_duration }}';
+  var SCRUB_SMOOTH = 1.2;
+
+  /* ── CDN loader (shared with other sections, de-duped by data attr) ── */
+  function loadScript(src, cb) {
+    if (document.querySelector('script[data-gsap-lib="' + src + '"]')) { cb(); return; }
+    var el = document.createElement('script');
+    el.src = src;
+    el.dataset.gsapLib = src;
+    el.onload = cb;
+    document.head.appendChild(el);
+  }
+
+  function init() {
+    var section = document.getElementById(SID);
+    if (!section || section.dataset.tzReady) return;
+    section.dataset.tzReady = '1';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    var frontLayers = section.querySelectorAll('.tz-media__front');
+    var scatterImgs = section.querySelectorAll('.tz-img');
+
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: SCROLL_END,
+        scrub: SCRUB_SMOOTH,
+        pin: true,
+        anticipatePin: 1,
+        onUpdate: function (self) {
+          /* Apply eased progress to CSS variable — drives heading split + media scale */
+          var eased = gsap.parseEase('power1.inOut')(self.progress);
+          section.style.setProperty('--tz-progress', eased);
+        }
+      }
+    });
+
+    /* Scatter images fly toward the viewer in 3D */
+    if (scatterImgs.length) {
+      gsap.set(scatterImgs, {
+        transformStyle: 'preserve-3d',
+        backfaceVisibility: 'hidden',
+        force3D: true
+      });
+
+      tl.to(scatterImgs, {
+        z: '100vh',
+        duration: 1,
+        ease: 'power1.inOut',
+        stagger: { amount: 0.2, from: 'center' }
+      });
+    }
+
+    /* Front lens rings: all converge to scale(1) then un-blur */
+    if (frontLayers.length) {
+      tl.to(frontLayers, {
+        scale: 1,
+        duration: 1,
+        ease: 'power1.inOut'
+      }, 0.6);
+
+      tl.to(frontLayers, {
+        filter: 'blur(0px)',
+        duration: 1,
+        ease: 'power1.inOut',
+        stagger: { amount: 0.2, from: 'end' }
+      }, 0.6);
+    }
+  }
+
+  function bootstrap() {
+    if (window.gsap && window.ScrollTrigger) { init(); return; }
+    var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
+    var ST_CDN   = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js';
+    loadScript(GSAP_CDN, function () {
+      loadScript(ST_CDN, init);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Telescope Zoom",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Main image"
+    },
+    {
+      "type": "image_picker",
+      "id": "main_image",
+      "label": "Background / zoom image",
+      "info": "This image fills the screen and is revealed through the telescope lens effect."
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "text_left",
+      "label": "Left word(s)",
+      "default": "for the",
+      "info": "Slides off to the left as you scroll."
+    },
+    {
+      "type": "text",
+      "id": "text_right",
+      "label": "Right word(s)",
+      "default": "planet",
+      "info": "Slides off to the right as you scroll."
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size — desktop (vw)",
+      "min": 2,
+      "max": 14,
+      "step": 0.5,
+      "unit": "vw",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size — mobile (vw)",
+      "min": 5,
+      "max": 20,
+      "step": 0.5,
+      "unit": "vw",
+      "default": 9
+    },
+    {
+      "type": "checkbox",
+      "id": "text_uppercase",
+      "label": "Uppercase heading",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "select",
+      "id": "scroll_duration",
+      "label": "Scroll duration",
+      "info": "How long the section stays pinned while the animation plays.",
+      "options": [
+        { "value": "+=80%",  "label": "Short (0.8× screen)" },
+        { "value": "+=150%", "label": "Medium (1.5× screen)" },
+        { "value": "+=220%", "label": "Long (2.2× screen)" },
+        { "value": "+=300%", "label": "Very long (3× screen)" }
+      ],
+      "default": "+=150%"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "scatter_image",
+      "name": "Scattered image",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Small image that flies toward the viewer as the zoom plays."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Telescope Zoom",
+      "settings": {
+        "text_left": "for the",
+        "text_right": "planet",
+        "scroll_duration": "+=150%"
+      },
+      "blocks": [
+        { "type": "scatter_image" },
+        { "type": "scatter_image" },
+        { "type": "scatter_image" },
+        { "type": "scatter_image" },
+        { "type": "scatter_image" },
+        { "type": "scatter_image" }
+      ]
+    }
+  ]
+}
+{% endschema %}

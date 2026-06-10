@@ -1,0 +1,567 @@
+{% comment %}
+  GSAP ScrollTrigger Text Animation Section
+  Self-contained: loads GSAP 3.x + ScrollTrigger from CDN once per page.
+  Safe to add multiple times — scripts are only injected once.
+{% endcomment %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<section
+  class="gsap-scroll-text section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+  id="gsap-scroll-text-{{ section.id }}"
+  style="{% render 'spacing-padding', settings: section.settings %}"
+>
+  <div class="gsap-scroll-text__inner">
+
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="gsap-scroll-text__eyebrow" data-gsap-eyebrow>
+        {{ section.settings.eyebrow | escape }}
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <div class="gsap-scroll-text__heading-wrap">
+        <{{ section.settings.heading_tag }} class="gsap-scroll-text__heading" data-gsap-heading>
+          {{ section.settings.heading | escape }}
+        </{{ section.settings.heading_tag }}>
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="gsap-scroll-text__subheading" data-gsap-subheading>
+        {{ section.settings.subheading | escape }}
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.body_text != blank -%}
+      <div class="gsap-scroll-text__body" data-gsap-body>
+        {{ section.settings.body_text }}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.button_label != blank -%}
+      <div class="gsap-scroll-text__cta" data-gsap-cta>
+        <a
+          href="{{ section.settings.button_link | default: '#' }}"
+          class="gsap-scroll-text__button"
+          {% if section.settings.button_link == blank %}aria-disabled="true"{% endif %}
+        >
+          {{ section.settings.button_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  #gsap-scroll-text-{{ section.id }} {
+    --gst-align: {{ section.settings.text_align }};
+    --gst-max-width: {{ section.settings.content_max_width }}px;
+    --gst-heading-size: clamp(2.2rem, {{ section.settings.heading_size }}vw, 9rem);
+    --gst-scale-y: {{ section.settings.heading_scale_y | default: 1 }};
+  }
+
+  @media (max-width: 749px) {
+    #gsap-scroll-text-{{ section.id }} {
+      --gst-heading-size: {{ section.settings.heading_size_mobile }}vw;
+      --gst-scale-y: {{ section.settings.heading_scale_y_mobile | default: 1 }};
+    }
+  }
+
+  {%- if section.settings.use_gradient_bg -%}
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__heading,
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__heading * {
+    background: linear-gradient(135deg, #114872 0%, #1a6494 35%, #2d8fca 65%, #5ab0dc 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+  }
+  {%- endif -%}
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__heading-wrap {
+    transform: scaleY(var(--gst-scale-y));
+    transform-origin: center;
+    display: block;
+    padding-block: calc((var(--gst-scale-y) - 1) * var(--gst-heading-size) * 1.05 / 2);
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__inner {
+    text-align: var(--gst-align);
+    max-width: var(--gst-max-width);
+    {% if section.settings.text_align == 'center' %}margin-inline: auto;{% endif %}
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.6;
+    margin: 0;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__heading {
+    font-size: var(--gst-heading-size);
+    line-height: 1.05;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__heading .gst-word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    margin-right: 0.28em;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__heading .gst-char {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__subheading {
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    line-height: 1.55;
+    font-weight: 400;
+    max-width: 58ch;
+    margin: 0;
+    {% if section.settings.text_align == 'center' %}margin-inline: auto;{% endif %}
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__body {
+    font-size: 1rem;
+    line-height: 1.75;
+    opacity: 0.75;
+    max-width: 65ch;
+    {% if section.settings.text_align == 'center' %}margin-inline: auto;{% endif %}
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__body > * {
+    margin: 0;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 2px solid currentColor;
+    border-radius: 2px;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    cursor: pointer;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__button:hover {
+    background-color: currentColor;
+  }
+
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__button:hover span,
+  #gsap-scroll-text-{{ section.id }} .gsap-scroll-text__button:hover {
+    filter: invert(1);
+  }
+</style>
+
+<script>
+(function () {
+  var SECTION_ID = 'gsap-scroll-text-{{ section.id }}';
+  var ANIM_STYLE  = '{{ section.settings.animation_style }}';
+  var TRIGGER_POS = '{{ section.settings.trigger_position }}';
+  var DURATION    = {{ section.settings.animation_duration }} / 1000;
+  var STAGGER     = {{ section.settings.stagger_amount }} / 1000;
+
+  function runAnimation() {
+    var section = document.getElementById(SECTION_ID);
+    if (!section || section.dataset.gsapReady) return;
+    section.dataset.gsapReady = '1';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    var eyebrow    = section.querySelector('[data-gsap-eyebrow]');
+    var heading    = section.querySelector('[data-gsap-heading]');
+    var subheading = section.querySelector('[data-gsap-subheading]');
+    var body       = section.querySelector('[data-gsap-body]');
+    var cta        = section.querySelector('[data-gsap-cta]');
+
+    var baseTrigger = {
+      trigger: section,
+      start: TRIGGER_POS,
+      once: true,
+    };
+
+    /* ── Heading animation ── */
+    if (heading) {
+      var raw = heading.textContent.trim();
+
+      if (ANIM_STYLE === 'chars-up' || ANIM_STYLE === 'chars-fade') {
+        /* Split into individual character spans */
+        heading.innerHTML = raw.split('').map(function (ch) {
+          if (ch === ' ') return '<span class="gst-char" style="display:inline-block;white-space:pre"> </span>';
+          return '<span class="gst-char">' + ch + '</span>';
+        }).join('');
+
+        var chars = heading.querySelectorAll('.gst-char');
+
+        if (ANIM_STYLE === 'chars-up') {
+          gsap.from(chars, {
+            scrollTrigger: baseTrigger,
+            y: '110%',
+            opacity: 0,
+            duration: DURATION,
+            ease: 'power4.out',
+            stagger: STAGGER,
+          });
+        } else {
+          gsap.from(chars, {
+            scrollTrigger: baseTrigger,
+            opacity: 0,
+            duration: DURATION * 0.7,
+            ease: 'power2.out',
+            stagger: STAGGER * 0.7,
+          });
+        }
+
+      } else if (ANIM_STYLE === 'words-up') {
+        /* Wrap each word in an overflow:hidden clip container */
+        heading.innerHTML = raw.split(' ').map(function (word) {
+          return '<span class="gst-word"><span class="gst-char">' + word + '</span></span>';
+        }).join('');
+
+        gsap.from(heading.querySelectorAll('.gst-char'), {
+          scrollTrigger: baseTrigger,
+          y: '105%',
+          opacity: 0,
+          duration: DURATION,
+          ease: 'power4.out',
+          stagger: STAGGER * 3,
+        });
+
+      } else if (ANIM_STYLE === 'scale-blur') {
+        gsap.from(heading, {
+          scrollTrigger: baseTrigger,
+          scale: 0.6,
+          opacity: 0,
+          filter: 'blur(20px)',
+          duration: DURATION * 1.1,
+          ease: 'expo.out',
+          clearProps: 'filter',
+        });
+
+      } else if (ANIM_STYLE === 'skew-up') {
+        gsap.from(heading, {
+          scrollTrigger: baseTrigger,
+          y: 80,
+          skewY: 5,
+          opacity: 0,
+          transformOrigin: 'left center',
+          duration: DURATION,
+          ease: 'power3.out',
+        });
+
+      } else if (ANIM_STYLE === 'clip-up') {
+        /* Mask-based reveal — clip from bottom */
+        gsap.set(heading, { clipPath: 'inset(100% 0% 0% 0%)' });
+        gsap.to(heading, {
+          scrollTrigger: baseTrigger,
+          clipPath: 'inset(0% 0% 0% 0%)',
+          duration: DURATION,
+          ease: 'power4.inOut',
+        });
+
+      } else {
+        /* Default: simple fade-up */
+        gsap.from(heading, {
+          scrollTrigger: baseTrigger,
+          y: 60,
+          opacity: 0,
+          duration: DURATION,
+          ease: 'power3.out',
+        });
+      }
+    }
+
+    /* ── Supporting elements — always fade-up with stagger ── */
+    var supports = [eyebrow, subheading, body, cta].filter(Boolean);
+    if (supports.length) {
+      gsap.from(supports, {
+        scrollTrigger: Object.assign({}, baseTrigger, { start: 'top 80%' }),
+        y: 28,
+        opacity: 0,
+        duration: DURATION * 0.85,
+        ease: 'power2.out',
+        stagger: 0.14,
+        delay: heading ? 0.18 : 0,
+      });
+    }
+  }
+
+  /* ── Load GSAP + ScrollTrigger from CDN once per page ── */
+  function loadScript(src, cb) {
+    if (document.querySelector('script[data-gsap-lib="' + src + '"]')) { cb(); return; }
+    var el = document.createElement('script');
+    el.src = src;
+    el.dataset.gsapLib = src;
+    el.onload = cb;
+    document.head.appendChild(el);
+  }
+
+  function bootstrap() {
+    if (window.gsap && window.ScrollTrigger) {
+      runAnimation();
+      return;
+    }
+    var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
+    var ST_CDN   = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js';
+    loadScript(GSAP_CDN, function () {
+      loadScript(ST_CDN, function () {
+        runAnimation();
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "GSAP Scroll Text",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "placeholder": "Our story"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Words that move people."
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading HTML tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "A statement so sharp it scrolls right into the soul."
+    },
+    {
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Body text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "select",
+      "id": "animation_style",
+      "label": "Heading animation style",
+      "options": [
+        { "value": "fade-up",    "label": "Fade up (default)" },
+        { "value": "chars-up",   "label": "Characters rise up" },
+        { "value": "chars-fade", "label": "Characters fade in" },
+        { "value": "words-up",   "label": "Words rise up (masked)" },
+        { "value": "clip-up",    "label": "Clip reveal" },
+        { "value": "skew-up",    "label": "Skew & rise" },
+        { "value": "scale-blur", "label": "Scale + blur in" }
+      ],
+      "default": "words-up"
+    },
+    {
+      "type": "select",
+      "id": "trigger_position",
+      "label": "Trigger when",
+      "options": [
+        { "value": "top 90%", "label": "Just entering view" },
+        { "value": "top 75%", "label": "25% into view (default)" },
+        { "value": "top 60%", "label": "40% into view" },
+        { "value": "top 50%", "label": "Middle of screen" }
+      ],
+      "default": "top 75%"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Animation duration (ms)",
+      "min": 300,
+      "max": 1800,
+      "step": 100,
+      "default": 900
+    },
+    {
+      "type": "range",
+      "id": "stagger_amount",
+      "label": "Stagger between chars (ms)",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size — desktop (vw)",
+      "min": 3,
+      "max": 12,
+      "step": 0.5,
+      "default": 6,
+      "unit": "vw"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size — mobile (vw)",
+      "min": 3,
+      "max": 20,
+      "step": 0.5,
+      "default": 10,
+      "unit": "vw"
+    },
+    {
+      "type": "range",
+      "id": "heading_scale_y",
+      "label": "Text height stretch — desktop",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "default": 1,
+      "info": "Stretch the heading text taller. 1 = normal, 1.5 = 50% taller, 2 = double height."
+    },
+    {
+      "type": "range",
+      "id": "heading_scale_y_mobile",
+      "label": "Text height stretch — mobile",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "default": 1,
+      "info": "Vertical stretch applied on screens 749px and under."
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Max content width (px)",
+      "min": 400,
+      "max": 1400,
+      "step": 20,
+      "default": 900
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_bg",
+      "label": "Use blue gradient on heading text",
+      "default": false,
+      "info": "Applies a navy-to-light-blue gradient (#114872 → #5ab0dc) to the heading text."
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "GSAP Scroll Text",
+      "settings": {
+        "heading": "Words that move people.",
+        "subheading": "A statement so sharp it scrolls right into the soul.",
+        "animation_style": "words-up",
+        "text_align": "center",
+        "heading_size": 6
+      }
+    }
+  ]
+}
+{% endschema %}

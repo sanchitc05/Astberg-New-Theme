@@ -73,22 +73,23 @@
   gap: 16px;
 }
 
-@media (max-width: 639px) {
+@media screen and (max-width: 749px) {
   #ImpactCounters-{{ section.id }} .ic-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    padding-bottom: 1rem;
-    scrollbar-width: none;
-    max-width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    overflow: hidden !important;
+    gap: 12px;
+    padding-bottom: 0;
+    margin-inline: 0;
+    padding-inline: 0;
+    scroll-snap-type: unset;
   }
-  #ImpactCounters-{{ section.id }} .ic-grid::-webkit-scrollbar { display: none; }
   #ImpactCounters-{{ section.id }} .ic-card {
-    flex: 0 0 min(85vw, 20rem);
-    scroll-snap-align: start;
+    flex: unset !important;
+    width: 100% !important;
+    min-width: unset !important;
+    padding: 24px;
+    scroll-snap-align: unset;
   }
 }
 

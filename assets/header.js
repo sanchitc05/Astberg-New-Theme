@@ -129,7 +129,25 @@ class HeaderComponent extends Component {
     this.#scrollRafId = requestAnimationFrame(() => {
       this.#scrollRafId = null;
       this.#updateScrollState();
+      this.#updateHomepageTransparency();
     });
+  };
+
+  #updateHomepageTransparency = () => {
+    const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
+    if (!isHomepage) return;
+
+    const hero = document.querySelector('.ch-hero') || document.querySelector('.ch-container.page-width');
+    if (!hero) return;
+
+    const threshold = hero.offsetHeight;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop < threshold) {
+      this.classList.add('header--transparent');
+    } else {
+      this.classList.remove('header--transparent');
+    }
   };
 
   #updateScrollState = () => {
@@ -194,6 +212,12 @@ class HeaderComponent extends Component {
       if (stickyMode === 'scroll-up' || stickyMode === 'always') {
         document.addEventListener('scroll', this.#handleWindowScroll);
       }
+    }
+
+    const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
+    if (isHomepage) {
+      document.addEventListener('scroll', this.#handleWindowScroll);
+      this.#updateHomepageTransparency();
     }
   }
 

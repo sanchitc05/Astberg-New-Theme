@@ -942,6 +942,37 @@
     transition: opacity var(--animation-speed) var(--animation-easing);
   }
 
+  /* Homepage dynamic transparency */
+  .header {
+    transition: background 0.3s ease;
+  }
+
+  .header.header--transparent {
+    background: transparent !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: var(--layer-overlay);
+  }
+
+  .header.header--transparent,
+  .header.header--transparent :is(.header__underlay-closed, .header__underlay-open, .header__row) {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: transparent !important;
+  }
+
+  .header.header--transparent :is(.header-logo, .header-actions__action, .header__icon--menu, .dropdown-localization__button, .menu-list__link) {
+    color: #ffffff !important;
+  }
+
+  .header.header--transparent .header-logo__image {
+    filter: brightness(0) invert(1) !important;
+  }
+
   /* Header action button styles */
   .header-actions__action {
     --button-color: #000000;

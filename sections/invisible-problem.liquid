@@ -55,84 +55,63 @@
 {% stylesheet %}
   .ip-section {
     padding: 6rem 0;
-    background: #ffffff;
+    background: transparent !important;
+    box-shadow: none !important;
     overflow-x: clip;
   }
 
   .ip-container {
-    /* page-width handles max-width + centering */
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 0 !important;
+    background: transparent !important;
   }
 
-  /* Section header */
-  .ip-head {
-    max-width: 48rem;
-    margin-bottom: 3rem;
-  }
-
-  .ip-eyebrow {
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: #0E7A43;
-    margin: 0 0 0.75rem 0;
-  }
-
-  .ip-h2 {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: #111827;
-    margin: 0 0 1rem 0;
-  }
-
-  .ip-gradient {
-    background: linear-gradient(135deg, #0E7A43 0%, #00B26B 55%, #A7F432 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .ip-lede {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: #6B7280;
-    max-width: 42rem;
-    margin: 0;
-  }
-
-  /* Grid */
+  /* Grid converted to Flex Carousel */
   .ip-grid {
-    display: grid;
-    gap: 1.25rem;
-    grid-template-columns: repeat(1, 1fr);
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    gap: 0 !important;
+    padding: 16px 0 24px 0;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .ip-grid::after,
+  .ip-grid::before {
+    display: none !important;
+  }
+
+  .ip-grid > * {
+    flex: 0 0 calc(33.333% - 16px);
+    max-width: calc(33.333% - 16px);
+    margin-right: 24px;
+    box-sizing: border-box;
+    background: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ip-grid > * {
+      flex: 0 0 calc(100% - 24px);
+      max-width: calc(100% - 24px);
+      margin-right: 24px;
+    }
   }
 
   @media screen and (max-width: 639px) {
     .ip-section {
       padding: 4rem 0;
     }
+  }
 
-    .ip-grid {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
-      padding-bottom: 1rem;
-      margin-inline: calc(var(--page-margin, 16px) * -1);
-      padding-inline: var(--page-margin, 16px);
-      scroll-padding-inline: var(--page-margin, 16px);
-      scrollbar-width: none;
-      max-width: 100%;
-    }
-    .ip-grid::-webkit-scrollbar { display: none; }
-    .ip-poll {
-      flex: 0 0 min(85vw, 20rem);
-      scroll-snap-align: start;
-    }
+  #InvisibleProblem-{{ section.id }} {
+    background-color: transparent !important;
+    padding-bottom: 32px !important;
   }
 
   /* Pollutant card */
@@ -240,15 +219,6 @@
     .ip-section {
       padding: 8rem 0;
     }
-    .ip-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media screen and (min-width: 1024px) {
-    .ip-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
   }
 {% endstylesheet %}
 
@@ -256,6 +226,51 @@
   (function () {
     var root = document.getElementById('InvisibleProblem-{{ section.id }}');
     if (!root) return;
+
+    var grid = root.querySelector('.ip-grid');
+    if (grid) {
+      var items = Array.from(grid.children);
+      var total = items.length;
+      var currentIndex = 0;
+
+      // Clone items for infinite loop before initializing animations
+      items.forEach(function(item) {
+        var clone = item.cloneNode(true);
+        grid.appendChild(clone);
+      });
+
+      var getItemWidth = function() {
+        if (items.length === 0) return 0;
+        var cardStyle = window.getComputedStyle(items[0]);
+        var marginRight = parseFloat(cardStyle.marginRight) || 24;
+        return items[0].offsetWidth + marginRight;
+      };
+
+      var itemWidth = getItemWidth();
+
+      var slideNext = function() {
+        currentIndex++;
+        grid.style.transition = 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)';
+        grid.style.transform = 'translateX(-' + (currentIndex * itemWidth) + 'px)';
+
+        if (currentIndex >= total) {
+          setTimeout(function() {
+            grid.style.transition = 'none';
+            currentIndex = 0;
+            grid.style.transform = 'translateX(0)';
+          }, 1000);
+        }
+      };
+
+      var intervalId = setInterval(slideNext, 2000);
+
+      window.addEventListener('resize', function() {
+        itemWidth = getItemWidth();
+        grid.style.transition = 'none';
+        grid.style.transform = 'translateX(0)';
+        currentIndex = 0;
+      });
+    }
 
     // Reveal animation
     if ('IntersectionObserver' in window) {

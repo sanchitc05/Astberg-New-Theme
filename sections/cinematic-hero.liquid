@@ -293,26 +293,27 @@
 
   @media screen and (max-width: 749px) {
     .ch-stats {
-      justify-content: flex-start;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
-      padding-bottom: 1rem;
-      scrollbar-width: none;
-      gap: 32px;
-      max-width: 100%;
-      margin-inline: calc(var(--page-margin, 16px) * -1);
-      padding-inline: var(--page-margin, 16px);
-      scroll-padding-inline: var(--page-margin, 16px);
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      overflow: hidden !important;
+      overflow-x: unset !important;
+      scroll-snap-type: unset !important;
+      flex-wrap: unset !important;
+      gap: 24px 12px;
+      padding: 32px 16px 16px 16px;
+      margin-inline: 0;
+      justify-content: unset;
     }
     .ch-stats::-webkit-scrollbar { display: none; }
     .ch-stat {
-      flex: 0 0 auto;
-      min-width: 140px;
-      scroll-snap-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      scroll-snap-align: unset !important;
+      min-width: unset !important;
+      width: 100% !important;
     }
     .ch-divider {
       display: none;

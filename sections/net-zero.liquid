@@ -117,41 +117,34 @@
     flex-direction: column;
   }
 
-  @media screen and (max-width: 639px) {
+  @media screen and (max-width: 749px) {
     .ntz-timeline {
       flex-direction: row;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow: visible !important;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+      gap: 0 !important;
+      margin-inline: 0 !important;
+      padding-inline: 0 !important;
       padding-bottom: 1.5rem;
-      scrollbar-width: none;
-      gap: 0;
-      max-width: 100%;
-      margin-inline: calc(var(--page-margin, 16px) * -1);
-      padding-inline: var(--page-margin, 16px);
-      scroll-padding-inline: var(--page-margin, 16px);
     }
-    .ntz-timeline::-webkit-scrollbar { display: none; }
     .ntz-item {
-      flex: 0 0 min(85vw, 22rem);
-      scroll-snap-align: start;
+      flex: 0 0 80vw !important;
+      max-width: 80vw !important;
+      margin-right: 16px;
+      scroll-snap-align: unset !important;
       padding-bottom: 0 !important;
     }
     .ntz-dot-col {
-      height: 100%;
+      display: none; /* Hide dots on mobile as requested or to simplify carousel */
+    }
+    .ntz-item-body {
+      padding-left: 0;
     }
     .ntz-line {
-      width: 100% !important;
-      height: 1px !important;
-      min-height: 0 !important;
-      transform: scaleX(0);
-      transform-origin: left;
-      margin-top: 10px !important;
-    }
-    #NetZero-{{ section.id }} .ntz-item.ntz-visible .ntz-line {
-      transform: scaleX(1);
+      display: none;
     }
   }
 
@@ -263,29 +256,30 @@
   .ntz-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
     gap: 20px;
     align-content: start;
   }
 
-  @media screen and (max-width: 639px) {
+  @media screen and (max-width: 749px) {
     .ntz-stats {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
-      padding-bottom: 1rem;
-      scrollbar-width: none;
-      max-width: 100%;
-      margin-inline: calc(var(--page-margin, 16px) * -1);
-      padding-inline: var(--page-margin, 16px);
-      scroll-padding-inline: var(--page-margin, 16px);
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-rows: auto auto !important;
+      gap: 12px !important;
+      overflow: visible !important;
+      margin-inline: 0 !important;
+      padding-inline: 0 !important;
+      scroll-snap-type: unset !important;
+      width: 100% !important;
     }
-    .ntz-stats::-webkit-scrollbar { display: none; }
     .ntz-stat {
-      flex: 0 0 min(85vw, 20rem);
-      scroll-snap-align: start;
+      flex: unset !important;
+      width: 100% !important;
+      min-width: unset !important;
+      flex-shrink: unset !important;
+      padding: 20px 16px !important;
+      box-sizing: border-box !important;
     }
   }
 
@@ -349,6 +343,15 @@
     }
   }
 
+  @media screen and (max-width: 749px) {
+    .ntz-grid {
+      display: block !important;
+    }
+    .ntz-timeline {
+      margin-bottom: 40px !important;
+    }
+  }
+
   @media screen and (max-width: 639px) {
     .ntz-section {
       padding: 80px 0;
@@ -389,6 +392,61 @@
         if (!match) return;
         el.setAttribute('data-ntz-target', match[1]);
         el.setAttribute('data-ntz-suffix', match[2]);
+      });
+    }
+
+    /* ── Timeline Carousel (Mobile) ── */
+    function initTimelineCarousel() {
+      if (window.innerWidth > 749) return;
+      
+      var timeline = root.querySelector('.ntz-timeline');
+      if (!timeline) return;
+
+      var items = timeline.querySelectorAll('.ntz-item');
+      var total = items.length;
+      if (total === 0) return;
+
+      var currentIndex = 0;
+      var isPaused = false;
+
+      function getItemWidth() {
+        var firstItem = items[0];
+        if (!firstItem) return 0;
+        var style = window.getComputedStyle(firstItem);
+        var marginRight = parseFloat(style.marginRight) || 0;
+        return firstItem.offsetWidth + marginRight;
+      }
+
+      var itemWidth = getItemWidth();
+
+      function slideNext() {
+        if (isPaused) return;
+        currentIndex++;
+
+        if (currentIndex >= total) {
+          // Instant reset to start after the last original item
+          currentIndex = 0;
+          timeline.style.transition = 'none';
+          timeline.style.transform = 'translateX(0)';
+        } else {
+          timeline.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+          timeline.style.transform = 'translateX(-' + (currentIndex * itemWidth) + 'px)';
+        }
+      }
+
+      var intervalId = setInterval(slideNext, 2500);
+
+      // Pause auto-slide on touch interaction
+      timeline.addEventListener('touchstart', function() { isPaused = true; }, {passive: true});
+      timeline.addEventListener('touchend', function() { isPaused = false; }, {passive: true});
+
+      window.addEventListener('resize', function() {
+        itemWidth = getItemWidth();
+        if (window.innerWidth > 749) {
+          clearInterval(intervalId);
+          timeline.style.transform = 'none';
+          timeline.style.transition = 'none';
+        }
       });
     }
 
@@ -454,6 +512,7 @@
     }
 
     initCountUps();
+    initTimelineCarousel();
     initReveal();
 
     /* ── Shopify editor reload ── */

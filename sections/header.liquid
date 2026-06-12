@@ -439,8 +439,15 @@
       radial-gradient(ellipse at top right, rgba(74, 222, 128, 0.20) 0%, transparent 60%),
       radial-gradient(ellipse at bottom left, rgba(163, 230, 53, 0.30) 0%, transparent 60%),
       #ffffff;
-    --color-foreground: #111827;
-    --color-foreground-rgb: 17, 24, 39;
+    --text-color-white: #ffffff;
+    --text-color-dark: #111827;
+    --color-progress-val: var(--color-progress, 0);
+
+    --color-foreground: color-mix(
+      in srgb,
+      var(--text-color-dark) calc(var(--color-progress-val) * 100%),
+      var(--text-color-white)
+    );
     --color-border: transparent;
     --color-border-rgb: 255, 255, 255;
 
@@ -467,17 +474,41 @@
     border-radius: var(--style-border-radius-buttons-primary);
   }
 
-  .header--brand-gradient :is(.header-logo, .header-actions__action, .header__icon--menu, .dropdown-localization__button) {
-    color: #111827;
+  .header.header--brand-gradient :is(.header-logo, .header-actions__action, .header__icon--menu, .dropdown-localization__button, .menu-list__link),
+  .header.header--brand-gradient .menu-list :is(.menu-list__link--active, [aria-current="page"]) {
+    --text-color-white: #ffffff;
+    --text-color-dark: #111827;
+    --color-progress-val: var(--color-progress, 0);
+
+    color: color-mix(
+      in srgb,
+      var(--text-color-white),
+      var(--text-color-dark) calc(var(--color-progress-val) * 100%)
+    );
+    fill: currentColor;
+    stroke: currentColor;
+    transition: none;
   }
 
   .header--brand-gradient .header-logo__image {
     filter: none;
+    transition: filter 0.3s ease;
   }
 
-  .header--brand-gradient .header__underlay-closed,
-  .header--brand-gradient .header__underlay-open {
-    background: var(--gradient-hero);
+  .header--brand-gradient.header--transparent .header-logo__image {
+    filter: brightness(0) invert(1);
+  }
+
+  /* Reset fill for outline icons that should not be filled */
+  .header--brand-gradient .account-button__icon,
+  .header--brand-gradient .action__cart svg,
+  .header--brand-gradient .search-action svg {
+    fill: none;
+  }
+
+  .header--brand-gradient .header-actions__action svg :is(path, circle, rect, line, polyline, polygon) {
+    stroke: currentColor;
+    fill: inherit;
   }
 
   .header--brand-gradient[transparent],
@@ -489,8 +520,6 @@
     background: var(--gradient-hero);
     --header-logo-display: unset;
     --header-logo-inverse-display: unset;
-    --color-foreground: #111827;
-    --color-foreground-rgb: 17, 24, 39;
     --color-background: transparent;
     --color-background-rgb: 0, 0, 0;
     --color-border: transparent;
@@ -944,45 +973,88 @@
 
   /* Homepage dynamic transparency */
   .header {
-    transition: background 0.3s ease;
+    /* Promote to a compositing layer to prevent repaints and layout shifts during scroll */
+    will-change: transform, background-color, backdrop-filter, box-shadow;
+    /* Only transition properties NOT driven by --scroll-progress to avoid stutter */
+    transition: transform 0.3s ease;
   }
 
   .header.header--transparent {
-    background: transparent !important;
-    position: absolute !important;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
     z-index: var(--layer-overlay);
+    background: transparent;
   }
 
-  .header.header--transparent,
-  .header.header--transparent :is(.header__underlay-closed, .header__underlay-open, .header__row) {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: transparent !important;
+  /* Smoothly fade in the background using lerped scroll progress */
+  .header :is(.header__underlay-closed, .header__underlay-open) {
+    /* Use lerped progress for background opacity and blur */
+    --bg-opacity: var(--scroll-progress, 0);
+    background: var(--gradient-hero, var(--color-background));
+    opacity: var(--bg-opacity);
+    visibility: visible;
+    backdrop-filter: blur(calc(10px * var(--bg-opacity)));
+    -webkit-backdrop-filter: blur(calc(10px * var(--bg-opacity)));
   }
 
-  .header.header--transparent :is(.header-logo, .header-actions__action, .header__icon--menu, .dropdown-localization__button, .menu-list__link) {
-    color: #ffffff !important;
+  /* Ensure rows stay transparent and border fades in gradually */
+  .header .header__row {
+    background: transparent;
+    border-color: rgba(var(--color-border-rgb), var(--scroll-progress, 0));
+    transition: border-color 0.2s ease;
   }
 
+  /* Continuous color interpolation using color-mix */
+  #header-component :is(.header-logo, .header-actions__action, .header__icon--menu, .dropdown-localization__button, .menu-list__link),
+  #header-component .menu-list :is(.menu-list__link--active, [aria-current="page"]) {
+    --text-color-white: #ffffff;
+    --text-color-dark: #111827;
+    --color-progress-val: var(--color-progress, 0);
+
+    color: color-mix(
+      in srgb,
+      var(--text-color-white),
+      var(--text-color-dark) calc(var(--color-progress-val) * 100%)
+    );
+    fill: currentColor;
+    stroke: currentColor;
+    /* Transition for hover only, color is driven by scroll */
+    transition: opacity 0.2s ease, filter 0.2s ease;
+    will-change: color;
+  }
+
+  /* Specific icon handling to ensure they inherit color and use strokes */
+  .header .header-actions__action svg {
+    color: inherit;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .header .header-actions__action svg :is(path, circle, rect, line, polyline, polygon) {
+    stroke: currentColor;
+    fill: inherit;
+  }
+
+  .header .header-logo__image {
+    transition: filter 0.3s ease;
+  }
+
+  /* Logo filter toggle at the boundary */
   .header.header--transparent .header-logo__image {
-    filter: brightness(0) invert(1) !important;
+    filter: brightness(0) invert(1);
   }
 
-  /* Header action button styles */
   .header-actions__action {
-    --button-color: #000000;
-    color: var(--button-color);
     cursor: pointer;
     display: flex;
     justify-content: center;
 
     &:hover {
-      --button-color: #A3E635;
+      color: #A3E635;
       text-shadow: 0 0 10px #A3E635;
     }
   }
@@ -1074,7 +1146,10 @@
     font-weight: var(--menu-top-level-font-weight);
     padding-inline: var(--padding-2xs);
     margin-inline: calc(-1 * var(--padding-2xs));
-    color: #000000;
+    color: inherit;
+    box-shadow: none;
+    background-color: transparent;
+    border-color: transparent;
 
     &:hover {
       color: #A3E635;
@@ -1111,13 +1186,6 @@
 
   .dropdown-localization__button[aria-expanded='true'] .icon-caret svg {
     transform: rotate(180deg);
-  }
-
-  .dropdown-localization__button,
-  .dropdown-localization__button:hover {
-    box-shadow: none;
-    background-color: transparent;
-    border-color: transparent;
   }
 
   dropdown-localization-component .localization-form__list {

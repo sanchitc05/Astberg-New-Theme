@@ -123,30 +123,105 @@ class HeaderComponent extends Component {
     setHeaderMenuStyle();
   }
 
+  /**
+   * Current interpolated progress (0 to 1)
+   * @type {number}
+   */
+  #currentProgress = 0;
+  #currentColorProgress = 0;
+
+  /**
+   * Target progress based on scroll position
+   * @type {number}
+   */
+  #targetProgress = 0;
+  #targetColorProgress = 0;
+
+  /**
+   * Whether the progress interpolation loop is running
+   * @type {boolean}
+   */
+  #isUpdatingProgress = false;
+
   #handleWindowScroll = () => {
+    this.#updateHomepageTransparency();
+    
     if (this.#scrollRafId !== null) return;
 
     this.#scrollRafId = requestAnimationFrame(() => {
       this.#scrollRafId = null;
       this.#updateScrollState();
-      this.#updateHomepageTransparency();
     });
+  };
+
+  #smoothstep(x) {
+    return x * x * (3 - 2 * x);
+  }
+
+  #lerpProgress = () => {
+    const delta = this.#targetProgress - this.#currentProgress;
+    const colorDelta = this.#targetColorProgress - this.#currentColorProgress;
+    
+    // Smoothly approach the target value
+    // If the difference is tiny, snap to target to prevent infinite oscillation
+    if (Math.abs(delta) < 0.0001 && Math.abs(colorDelta) < 0.0001) {
+      this.#currentProgress = this.#targetProgress;
+      this.#currentColorProgress = this.#targetColorProgress;
+      this.#isUpdatingProgress = false;
+    } else {
+      // Increased from 0.15 to 0.3 for snappier catch-up
+      this.#currentProgress += delta * 0.3;
+      this.#currentColorProgress += colorDelta * 0.3;
+    }
+
+    this.style.setProperty('--scroll-progress', this.#currentProgress.toFixed(4));
+    this.style.setProperty('--color-progress', this.#currentColorProgress.toFixed(4));
+
+    // Handle structural class toggle based on INTERPOLATED progress to avoid specificity jumps
+    // We only remove the transparent layout when the fade is basically finished.
+    if (this.#currentProgress > 0.99) {
+      this.classList.remove('header--transparent');
+    } else if (this.#currentProgress < 0.01) {
+      this.classList.add('header--transparent');
+    }
+
+    if (this.#isUpdatingProgress) {
+      requestAnimationFrame(this.#lerpProgress);
+    }
   };
 
   #updateHomepageTransparency = () => {
     const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
-    if (!isHomepage) return;
-
-    const hero = document.querySelector('.ch-hero') || document.querySelector('.ch-container.page-width');
-    if (!hero) return;
-
-    const threshold = hero.offsetHeight;
+    const hasTransparentAttr = this.hasAttribute('transparent');
+    
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    if (scrollTop < threshold) {
-      this.classList.add('header--transparent');
+    if (!isHomepage && !hasTransparentAttr) {
+      this.#targetProgress = 1;
+      this.#targetColorProgress = 1;
     } else {
-      this.classList.remove('header--transparent');
+      // Calculate eased target progress over a 150px range (reduced from 250px)
+      const fadeRange = 150;
+      const rawProgress = Math.min(scrollTop / fadeRange, 1);
+      this.#targetProgress = this.#smoothstep(rawProgress);
+      
+      const colorFadeRange = 180;
+      const rawColorProgress = Math.min(scrollTop / colorFadeRange, 1);
+      this.#targetColorProgress = this.#smoothstep(rawColorProgress);
+      
+      // We no longer toggle 'header--transparent' here based on hero height.
+      // Instead, we let #lerpProgress handle it based on the visual transition state.
+    }
+
+    // Initialization fix: Ensure the class is present if progress is low on load
+    if (this.#currentProgress < 0.01 && scrollTop < 10) {
+      this.classList.add('header--transparent');
+    }
+
+    // Start the interpolation loop if not already running
+    if (!this.#isUpdatingProgress && (Math.abs(this.#targetProgress - this.#currentProgress) > 0.0001 || Math.abs(this.#targetColorProgress - this.#currentColorProgress) > 0.0001)) {
+      this.#isUpdatingProgress = true;
+      requestAnimationFrame(this.#lerpProgress);
     }
   };
 
@@ -206,16 +281,14 @@ class HeaderComponent extends Component {
     this.addEventListener('overflowMinimum', this.#handleOverflowMinimum);
 
     const stickyMode = this.getAttribute('sticky');
+    const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
+    
     if (stickyMode) {
       this.#observeStickyPosition(stickyMode === 'always');
-
-      if (stickyMode === 'scroll-up' || stickyMode === 'always') {
-        document.addEventListener('scroll', this.#handleWindowScroll);
-      }
     }
 
-    const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
-    if (isHomepage) {
+    // Single point of registration for scroll events to avoid duplicate listeners
+    if (isHomepage || stickyMode === 'scroll-up' || stickyMode === 'always') {
       document.addEventListener('scroll', this.#handleWindowScroll);
       this.#updateHomepageTransparency();
     }
@@ -231,6 +304,7 @@ class HeaderComponent extends Component {
       cancelAnimationFrame(this.#scrollRafId);
       this.#scrollRafId = null;
     }
+    this.#isUpdatingProgress = false;
     document.body.style.setProperty('--header-height', '0px');
   }
 }

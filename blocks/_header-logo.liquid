@@ -29,26 +29,24 @@
     class="header-logo__image-container header-logo__image-container--original"
     data-testid="header-logo"
   >
-    <img
-      src="{{ 'logo-black.png' | asset_img_url: 'master' }}"
-      class="header-logo__image"
-      alt="{{ alt_text_fallback }}"
-      loading="eager"
-      style="{{ logo_style }}"
-    >
+    {% if block.settings.logo_gradient != blank %}
+      {{ block.settings.logo_gradient | image_url: height: settings.logo_height | image_tag: class: 'header-logo__image', loading: 'eager', style: logo_style, alt: alt_text_fallback }}
+    {% else %}
+      {{ shop.name }}
+    {% endif %}
   </span>
 
   <span
     class="header-logo__image-container header-logo__image-container--inverse"
     data-testid="header-logo-inverse"
   >
-    <img
-      src="{{ 'logo-white.png' | asset_img_url: 'master' }}"
-      class="header-logo__image"
-      alt="{{ alt_text_fallback }}"
-      loading="eager"
-      style="{{ logo_style }}"
-    >
+    {% if block.settings.logo_transparent != blank %}
+      {{ block.settings.logo_transparent | image_url: height: settings.logo_height | image_tag: class: 'header-logo__image', loading: 'eager', style: logo_style, alt: alt_text_fallback }}
+    {% elsif block.settings.logo_gradient != blank %}
+      {{ block.settings.logo_gradient | image_url: height: settings.logo_height | image_tag: class: 'header-logo__image', loading: 'eager', style: logo_style, alt: alt_text_fallback }}
+    {% else %}
+      {{ shop.name }}
+    {% endif %}
   </span>
 </a>
 
@@ -127,6 +125,16 @@
     {
       "type": "paragraph",
       "content": "t:content.edit_logo_in_theme_settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_transparent",
+      "label": "Logo - Transparent Header"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_gradient",
+      "label": "Logo - Gradient Header"
     },
     {
       "type": "header",

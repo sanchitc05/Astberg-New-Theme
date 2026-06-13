@@ -383,13 +383,20 @@
   /** mega menu **/
   .menu-list__submenu,
   .overflow-menu::part(overflow) {
+    /* Scoped theme variables with fallbacks */
+    --menu-dropdown-bg: #ffffff;
+    --menu-dropdown-text: #1a1a1a;
+    --menu-dropdown-text-muted: #4a4a4a;
+    --menu-dropdown-hover: #0e7a43;
+    --menu-dropdown-border: rgba(17, 24, 39, 0.1);
+
     --submenu-padding-block-start: var(--padding-3xl);
     --submenu-padding-block-end: var(--padding-3xl);
-    --mega-menu-surface: #ffffff;
-    --mega-menu-text: #111827;
-    --mega-menu-text-muted: rgb(17 24 39 / 0.68);
-    --mega-menu-border: rgb(17 24 39 / 0.12);
-    --mega-menu-hover-surface: rgb(14 122 67 / 0.08);
+    --mega-menu-surface: var(--menu-dropdown-bg);
+    --mega-menu-text: var(--menu-dropdown-text);
+    --mega-menu-text-muted: var(--menu-dropdown-text-muted);
+    --mega-menu-border: var(--menu-dropdown-border);
+    --mega-menu-hover-surface: rgba(14, 122, 67, 0.08);
     --color-background: var(--mega-menu-surface);
     --color-background-rgb: 255, 255, 255;
     --color-foreground: var(--mega-menu-text);
@@ -398,14 +405,19 @@
     --color-border-rgb: 17, 24, 39;
     --color-foreground-muted: var(--mega-menu-text-muted);
     --menu-parent-font-color: var(--mega-menu-text);
-    --menu-parent-active-font-color: #0e7a43;
+    --menu-parent-active-font-color: var(--menu-dropdown-hover);
     --menu-child-font-color: var(--mega-menu-text-muted);
-    --menu-child-active-font-color: #0e7a43;
+    --menu-child-active-font-color: var(--menu-dropdown-hover);
 
-    color: var(--mega-menu-text);
-    background-color: var(--mega-menu-surface);
-    border-block: 1px solid var(--mega-menu-border);
-    box-shadow: 0 18px 48px rgb(17 24 39 / 0.14);
+    /* Clean floating card/panel styling */
+    color: var(--mega-menu-text) !important;
+    background-color: var(--mega-menu-surface) !important;
+    background: var(--mega-menu-surface) !important;
+    border-bottom: 1px solid var(--mega-menu-border) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
   }
 
   .header__row[style*='--border-bottom-width: 0px'] {
@@ -418,24 +430,24 @@
   .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__submenu,
   .overflow-menu::part(overflow) {
     --submenu-content-opacity: 0;
-    --submenu-content-animation: opacity calc(var(--submenu-animation-speed) * 0.75) var(--animation-easing);
+    --submenu-content-animation: opacity calc(var(--submenu-animation-speed, 360ms) * 0.75) var(--animation-easing);
 
     visibility: hidden;
     position: absolute;
     width: 100%;
     left: 0;
-    top: calc(100% - 1px + var(--border-bottom-width) - (var(--full-open-header-height) - var(--submenu-height)));
-    z-index: calc(var(--layer-header-menu) + 1);
+    top: 100% !important; /* Position right below the header row */
+    z-index: calc(var(--layer-header-menu, 12) + 1) !important; /* Above standard page contents */
     padding-inline: var(--padding-inline);
-    /* Clip path starts at header height so it doesn't mess with the pointer events in the header */
-    clip-path: rect(var(--header-height) 100% var(--full-open-header-height) 0); /* stylelint-disable-line */
-    transition: clip-path var(--submenu-animation-speed) var(--ease-out-cubic); /* stylelint-disable-line */
+    /* Clip path reveals the submenu container relative to itself */
+    clip-path: inset(0 0 100% 0); /* Closed state */
+    transition: visibility 0s var(--submenu-animation-speed, 360ms), clip-path var(--submenu-animation-speed, 360ms) var(--ease-out-cubic);
   }
 
   [data-submenu-overlap-bottom-row] {
     .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__submenu,
     .overflow-menu::part(overflow) {
-      clip-path: rect(var(--top-row-height) 100% var(--full-open-header-height) 0); /* stylelint-disable-line */
+      top: var(--top-row-height) !important; /* Position it below the top row (overlapping the bottom row) */
     }
   }
 
@@ -449,6 +461,8 @@
     --submenu-content-opacity: 1;
 
     visibility: visible;
+    clip-path: inset(0 0 0% 0) !important; /* Open state: fully unclipped */
+    transition: visibility 0s, clip-path var(--submenu-animation-speed, 360ms) var(--ease-out-cubic) !important;
   }
 
   .overflow-menu::part(overflow) {
@@ -488,7 +502,7 @@
       grid-row: 1;
       grid-area: right;
       grid-row-end: span calc(var(--overflow-count) + 1);
-      padding-inline-start: var(--menu-horizontal-gap);
+      padding-inline-start: var(--menu-horizontal-gap, 30px);
     }
 
     .menu-list__submenu-inner {
@@ -515,37 +529,49 @@
 
   .menu-list__submenu-inner,
   .overflow-menu::part(overflow-list) {
-    padding-block-start: var(--submenu-padding-block-start);
-    padding-block-end: var(--submenu-padding-block-end);
-    padding-inline: var(--section-padding-inline);
+    /* Responsive padding: tighter on tablet, generous on desktop */
+    padding-block-start: 24px !important;
+    padding-block-end: 24px !important;
+    padding-inline: 24px !important;
     opacity: var(--submenu-content-opacity);
     transition: var(--submenu-content-animation);
-    transform: translateY(calc(var(--full-open-header-height) - var(--submenu-height)));
 
-    /* Make overflow menu scrollable when content exceeds viewport */
-    max-height: calc(80vh - var(--header-height));
-    overflow-y: auto;
-    overflow-x: hidden;
+    /* transform is forced to none to override header.liquid translateY scroll shift which caused clipping */
+    transform: none !important; 
+
+    /* Scrollable safety net for smaller screens */
+    max-height: calc(80vh - var(--header-height, 60px)) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     scrollbar-width: thin;
     scrollbar-color: rgb(17 24 39 / var(--opacity-40)) transparent;
+
+    @media screen and (min-width: 990px) {
+      padding-block-start: 40px !important;
+      padding-block-end: 40px !important;
+      padding-inline: 40px !important;
+    }
   }
 
+  /* Overrule dynamic color inheritance from header-component. 
+     !important is required to block scroll-driven and transparency-driven overrides in header.liquid */
   .mega-menu__link {
     font-family: var(--menu-child-font-family);
     font-style: var(--menu-child-font-style);
-    font-weight: var(--menu-child-font-weight);
+    font-weight: var(--menu-child-font-weight, 400) !important;
     font-size: var(--menu-child-font-size);
     line-height: var(--menu-child-font-line-height);
     text-transform: var(--menu-child-font-case);
-    color: var(--menu-child-font-color);
+    color: var(--menu-dropdown-text-muted, #4a4a4a) !important;
     white-space: normal;
     text-decoration: none;
     display: inline-flex;
     padding: var(--padding-2xs) 0;
     text-shadow: none;
+    transition: color 0.2s ease !important;
 
     &:hover {
-      color: var(--menu-child-active-font-color);
+      color: var(--menu-dropdown-hover, #0e7a43) !important;
       text-shadow: none;
     }
   }
@@ -553,16 +579,53 @@
   .mega-menu__link--parent {
     font-family: var(--menu-parent-font-family);
     font-style: var(--menu-parent-font-style);
-    font-weight: var(--menu-parent-font-weight);
-    font-size: var(--menu-parent-font-size);
+    font-weight: var(--menu-parent-font-weight, 700) !important; /* Bold headers to stand out from sub-items */
+    font-size: var(--menu-parent-font-size, 16px) !important; /* Standard clear size */
     line-height: var(--menu-parent-font-line-height);
     text-transform: var(--menu-parent-font-case);
-    color: var(--menu-parent-font-color);
+    color: var(--menu-dropdown-text, #1a1a1a) !important;
     text-shadow: none;
+    margin-bottom: 12px !important; /* Dynamic gap below column header */
 
     &:hover {
-      color: var(--menu-parent-active-font-color);
+      color: var(--menu-dropdown-hover, #0e7a43) !important;
       text-shadow: none;
+    }
+  }
+
+  /* Gap between child links */
+  .mega-menu__column ul li {
+    margin-bottom: 8px !important;
+  }
+
+  .mega-menu__column ul li:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Vertical divider lines between columns on desktop views */
+  @media screen and (min-width: 990px) {
+    .mega-menu__column {
+      position: relative !important;
+    }
+    .mega-menu__column:not(:last-child)::after {
+      content: '' !important;
+      position: absolute !important;
+      right: calc(-1 * var(--menu-horizontal-gap, 30px) / 2) !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      width: 1px !important;
+      background-color: rgba(17, 24, 39, 0.08) !important;
+    }
+  }
+
+  /* Support reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .menu-list__submenu,
+    .menu-list__submenu-inner,
+    .overflow-menu::part(overflow),
+    .overflow-menu::part(overflow-list) {
+      transition: none !important;
+      animation: none !important;
     }
   }
 

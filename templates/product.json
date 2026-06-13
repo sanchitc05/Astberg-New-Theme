@@ -360,7 +360,6 @@
                           "type": "icon",
                           "settings": {
                             "icon": "heart",
-                            "image_upload": "shopify://shop_images/icons8-carbon.svg",
                             "width": 32,
                             "link": "",
                             "open_in_new_tab": false
@@ -454,7 +453,6 @@
                           "type": "icon",
                           "settings": {
                             "icon": "serving_dish",
-                            "image_upload": "shopify://shop_images/icons8-green-energy.svg",
                             "width": 32,
                             "link": "",
                             "open_in_new_tab": false
@@ -548,7 +546,6 @@
                           "type": "icon",
                           "settings": {
                             "icon": "leather",
-                            "image_upload": "shopify://shop_images/icons8-carbon-dioxide.svg",
                             "width": 32,
                             "link": "",
                             "open_in_new_tab": false
@@ -642,7 +639,6 @@
                           "type": "icon",
                           "settings": {
                             "icon": "shirt",
-                            "image_upload": "shopify://shop_images/icons8-smart-building.svg",
                             "width": 32,
                             "link": "",
                             "open_in_new_tab": false
@@ -874,6 +870,69 @@
         "padding-block-end": 32
       }
     },
+    "aq_metrics_J3zp3d": {
+      "type": "aq-metrics",
+      "blocks": {
+        "metric_kyVKMp": {
+          "type": "metric",
+          "settings": {
+            "label": "Lower CO₂",
+            "value": "62",
+            "unit": "%",
+            "decimals": "0"
+          }
+        },
+        "metric_giCFQ3": {
+          "type": "metric",
+          "settings": {
+            "label": "Lower PM2.5",
+            "value": "89",
+            "unit": "%",
+            "decimals": "0"
+          }
+        },
+        "metric_8MCH8m": {
+          "type": "metric",
+          "settings": {
+            "label": "Lower PM10",
+            "value": "84",
+            "unit": "%",
+            "decimals": "0"
+          }
+        },
+        "metric_7LpQCM": {
+          "type": "metric",
+          "settings": {
+            "label": "Lower VOC",
+            "value": "73",
+            "unit": "%",
+            "decimals": "0"
+          }
+        },
+        "metric_JDHbe9": {
+          "type": "metric",
+          "settings": {
+            "label": "Fresh Air Exchange",
+            "value": "6.4",
+            "unit": "× / hr",
+            "decimals": "1"
+          }
+        }
+      },
+      "block_order": [
+        "metric_kyVKMp",
+        "metric_giCFQ3",
+        "metric_8MCH8m",
+        "metric_7LpQCM",
+        "metric_JDHbe9"
+      ],
+      "name": "AQ Metrics",
+      "settings": {
+        "eyebrow": "Air Quality Metrics",
+        "heading": "Measurable impact, every minute.",
+        "description": "Aggregate performance from Astberg installations across commercial, residential and healthcare deployments."
+      }
+    },
     "product_recommendations_8RVdzU": {
       "type": "product-recommendations",
       "blocks": {
@@ -1085,69 +1144,6 @@
         "subheading": "Find the perfect ventilation solution for your space",
         "show_fab": true,
         "fab_label": "Fan Calculator"
-      }
-    },
-    "aq_metrics_J3zp3d": {
-      "type": "aq-metrics",
-      "blocks": {
-        "metric_kyVKMp": {
-          "type": "metric",
-          "settings": {
-            "label": "Lower CO₂",
-            "value": "62",
-            "unit": "%",
-            "decimals": "0"
-          }
-        },
-        "metric_giCFQ3": {
-          "type": "metric",
-          "settings": {
-            "label": "Lower PM2.5",
-            "value": "89",
-            "unit": "%",
-            "decimals": "0"
-          }
-        },
-        "metric_8MCH8m": {
-          "type": "metric",
-          "settings": {
-            "label": "Lower PM10",
-            "value": "84",
-            "unit": "%",
-            "decimals": "0"
-          }
-        },
-        "metric_7LpQCM": {
-          "type": "metric",
-          "settings": {
-            "label": "Lower VOC",
-            "value": "73",
-            "unit": "%",
-            "decimals": "0"
-          }
-        },
-        "metric_JDHbe9": {
-          "type": "metric",
-          "settings": {
-            "label": "Fresh Air Exchange",
-            "value": "6.4",
-            "unit": "× / hr",
-            "decimals": "1"
-          }
-        }
-      },
-      "block_order": [
-        "metric_kyVKMp",
-        "metric_giCFQ3",
-        "metric_8MCH8m",
-        "metric_7LpQCM",
-        "metric_JDHbe9"
-      ],
-      "name": "AQ Metrics",
-      "settings": {
-        "eyebrow": "Air Quality Metrics",
-        "heading": "Measurable impact, every minute.",
-        "description": "Aggregate performance from Astberg installations across commercial, residential and healthcare deployments."
       }
     }
   },

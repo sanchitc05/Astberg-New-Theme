@@ -18,6 +18,8 @@
           "type": "_header-logo",
           "static": true,
           "settings": {
+            "logo_transparent": "shopify://shop_images/Untitled_design.png",
+            "logo_gradient": "shopify://shop_images/449a3fa5-c3f9-4077-91a5-d765f21b2388.__CR0_0_1940_600_PT0_SX970_V1.jpg",
             "hide_logo_on_home_page": false,
             "padding-block-start": 0,
             "padding-block-end": 0

@@ -1196,12 +1196,37 @@
     top: 0;
     height: 100dvh;
     left: 0;
-    background-color: var(--color-background);
     z-index: var(--layer-flat);
     transform: translateX(-5%);
     visibility: hidden;
     overflow-y: auto;
     opacity: 0;
+
+    /*
+     * Override inherited color variables from scheme-5 / .header--brand-gradient.
+     *
+     * Scheme-5 sets --color-foreground: #ffffff and --color-background: #ffffff
+     * (designed for transparent header overlay on dark hero images), producing
+     * white-on-white when inherited by this opaque submenu panel.
+     *
+     * Values sourced from the desktop mega menu dropdown palette defined in
+     * _header-menu.liquid L387-391 (--menu-dropdown-bg, --menu-dropdown-text,
+     * etc.) for cross-device visual consistency.
+     */
+    --color-background: var(--menu-dropdown-bg, #ffffff);
+    --color-foreground: var(--menu-dropdown-text, #1a1a1a);
+    /* RGB triplet must stay in sync with --color-foreground above.
+       Consumed by submenu-font-styles.liquid for opacity-based muted/active
+       font colors via rgb(var(--color-foreground-rgb) / <opacity>). */
+    --color-foreground-rgb: 26, 26, 26;
+    --color-foreground-muted: var(--menu-dropdown-text-muted, #4a4a4a);
+    --color-border: var(--menu-dropdown-border, rgba(17, 24, 39, 0.1));
+    --menu-top-level-font-color: var(--color-foreground, #1a1a1a);
+    --menu-parent-font-color: var(--color-foreground, #1a1a1a);
+    --menu-child-font-color: var(--color-foreground-muted, #4a4a4a);
+
+    background-color: var(--color-background, #ffffff);
+    color: var(--color-foreground, #1a1a1a);
   }
 
   .menu-drawer__back-button > .svg-wrapper {

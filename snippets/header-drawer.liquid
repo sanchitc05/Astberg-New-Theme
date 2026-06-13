@@ -296,16 +296,6 @@
                             </span>
                             <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                           </button>
-                          <button
-                            class="button button-unstyled close-button menu-drawer__close-button"
-                            type="button"
-                            aria-label="{{ 'actions.close' | t }}"
-                            on:click="header-drawer/close"
-                          >
-                            <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
-                              {{- 'icon-close.svg' | inline_asset_content -}}
-                            </span>
-                          </button>
                         </div>
                         {% liquid
                           assign render_link_image = false
@@ -677,16 +667,6 @@
                       </span>
                       {{ 'content.localization_region_and_language' | t }}
                     </button>
-                    <button
-                      class="button close-button menu-drawer__close-button"
-                      type="button"
-                      aria-label="{{ 'actions.close' | t }}"
-                      on:click="header-drawer/close"
-                    >
-                      <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
-                        {{- 'icon-close.svg' | inline_asset_content -}}
-                      </span>
-                    </button>
                   </div>
 
                   {% render 'localization-form',
@@ -832,9 +812,7 @@
   }
 
   details.menu-open .header__icon--menu .header-drawer-icon--close {
-    @media screen and (min-width: 750px) {
-      display: none;
-    }
+    display: none;
   }
 
   details.menu-open .header__icon--menu .header-drawer-icon--open {
@@ -890,8 +868,8 @@
 
   .menu-drawer,
   details[open] > .menu-drawer__submenu {
-    transition: transform var(--drawer-animation-speed) ease, visibility var(--drawer-animation-speed) ease,
-      opacity var(--drawer-animation-speed) ease;
+    transition: transform var(--drawer-animation-speed) var(--ease-out-cubic), visibility var(--drawer-animation-speed) var(--ease-out-cubic),
+      opacity var(--drawer-animation-speed) var(--ease-out-cubic);
   }
 
   .menu-open > .menu-drawer,

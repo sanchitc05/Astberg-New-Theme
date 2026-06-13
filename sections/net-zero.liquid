@@ -86,7 +86,7 @@
     margin: 0 0 16px 0;
   }
 
-  .ntz-h2 {
+  .ntz-section .ntz-h2 {
     font-size: clamp(36px, 4.6vw, 66px);
     font-weight: 700;
     line-height: 1.08;
@@ -119,32 +119,22 @@
 
   @media screen and (max-width: 749px) {
     .ntz-timeline {
-      flex-direction: row;
-      display: flex !important;
-      flex-wrap: nowrap !important;
-      overflow: visible !important;
-      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
-      gap: 0 !important;
-      margin-inline: 0 !important;
-      padding-inline: 0 !important;
-      padding-bottom: 1.5rem;
+      gap: 0;
     }
     .ntz-item {
-      flex: 0 0 80vw !important;
-      max-width: 80vw !important;
-      margin-right: 16px;
-      scroll-snap-align: unset !important;
-      padding-bottom: 0 !important;
-    }
-    .ntz-dot-col {
-      display: none; /* Hide dots on mobile as requested or to simplify carousel */
+      padding-bottom: 32px;
     }
     .ntz-item-body {
       padding-left: 0;
     }
-    .ntz-line {
-      display: none;
+    .ntz-yr {
+      font-size: 10px;
+    }
+    .ntz-ttl {
+      font-size: 16px;
+    }
+    .ntz-dsc {
+      font-size: 13px;
     }
   }
 
@@ -395,61 +385,6 @@
       });
     }
 
-    /* ── Timeline Carousel (Mobile) ── */
-    function initTimelineCarousel() {
-      if (window.innerWidth > 749) return;
-      
-      var timeline = root.querySelector('.ntz-timeline');
-      if (!timeline) return;
-
-      var items = timeline.querySelectorAll('.ntz-item');
-      var total = items.length;
-      if (total === 0) return;
-
-      var currentIndex = 0;
-      var isPaused = false;
-
-      function getItemWidth() {
-        var firstItem = items[0];
-        if (!firstItem) return 0;
-        var style = window.getComputedStyle(firstItem);
-        var marginRight = parseFloat(style.marginRight) || 0;
-        return firstItem.offsetWidth + marginRight;
-      }
-
-      var itemWidth = getItemWidth();
-
-      function slideNext() {
-        if (isPaused) return;
-        currentIndex++;
-
-        if (currentIndex >= total) {
-          // Instant reset to start after the last original item
-          currentIndex = 0;
-          timeline.style.transition = 'none';
-          timeline.style.transform = 'translateX(0)';
-        } else {
-          timeline.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-          timeline.style.transform = 'translateX(-' + (currentIndex * itemWidth) + 'px)';
-        }
-      }
-
-      var intervalId = setInterval(slideNext, 2500);
-
-      // Pause auto-slide on touch interaction
-      timeline.addEventListener('touchstart', function() { isPaused = true; }, {passive: true});
-      timeline.addEventListener('touchend', function() { isPaused = false; }, {passive: true});
-
-      window.addEventListener('resize', function() {
-        itemWidth = getItemWidth();
-        if (window.innerWidth > 749) {
-          clearInterval(intervalId);
-          timeline.style.transform = 'none';
-          timeline.style.transition = 'none';
-        }
-      });
-    }
-
     /* ── Reveal ── */
     function initReveal() {
       if (!('IntersectionObserver' in window)) {
@@ -512,7 +447,6 @@
     }
 
     initCountUps();
-    initTimelineCarousel();
     initReveal();
 
     /* ── Shopify editor reload ── */

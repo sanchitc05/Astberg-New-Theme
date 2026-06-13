@@ -385,8 +385,27 @@
   .overflow-menu::part(overflow) {
     --submenu-padding-block-start: var(--padding-3xl);
     --submenu-padding-block-end: var(--padding-3xl);
+    --mega-menu-surface: #ffffff;
+    --mega-menu-text: #111827;
+    --mega-menu-text-muted: rgb(17 24 39 / 0.68);
+    --mega-menu-border: rgb(17 24 39 / 0.12);
+    --mega-menu-hover-surface: rgb(14 122 67 / 0.08);
+    --color-background: var(--mega-menu-surface);
+    --color-background-rgb: 255, 255, 255;
+    --color-foreground: var(--mega-menu-text);
+    --color-foreground-rgb: 17, 24, 39;
+    --color-border: var(--mega-menu-border);
+    --color-border-rgb: 17, 24, 39;
+    --color-foreground-muted: var(--mega-menu-text-muted);
+    --menu-parent-font-color: var(--mega-menu-text);
+    --menu-parent-active-font-color: #0e7a43;
+    --menu-child-font-color: var(--mega-menu-text-muted);
+    --menu-child-active-font-color: #0e7a43;
 
-    background-color: transparent;
+    color: var(--mega-menu-text);
+    background-color: var(--mega-menu-surface);
+    border-block: 1px solid var(--mega-menu-border);
+    box-shadow: 0 18px 48px rgb(17 24 39 / 0.14);
   }
 
   .header__row[style*='--border-bottom-width: 0px'] {
@@ -406,7 +425,7 @@
     width: 100%;
     left: 0;
     top: calc(100% - 1px + var(--border-bottom-width) - (var(--full-open-header-height) - var(--submenu-height)));
-    z-index: var(--layer-header-menu);
+    z-index: calc(var(--layer-header-menu) + 1);
     padding-inline: var(--padding-inline);
     /* Clip path starts at header height so it doesn't mess with the pointer events in the header */
     clip-path: rect(var(--header-height) 100% var(--full-open-header-height) 0); /* stylelint-disable-line */
@@ -508,7 +527,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
-    scrollbar-color: rgb(var(--color-foreground-rgb) / var(--opacity-40)) transparent;
+    scrollbar-color: rgb(17 24 39 / var(--opacity-40)) transparent;
   }
 
   .mega-menu__link {
@@ -523,9 +542,11 @@
     text-decoration: none;
     display: inline-flex;
     padding: var(--padding-2xs) 0;
+    text-shadow: none;
 
     &:hover {
       color: var(--menu-child-active-font-color);
+      text-shadow: none;
     }
   }
 
@@ -537,9 +558,11 @@
     line-height: var(--menu-parent-font-line-height);
     text-transform: var(--menu-parent-font-case);
     color: var(--menu-parent-font-color);
+    text-shadow: none;
 
     &:hover {
       color: var(--menu-parent-active-font-color);
+      text-shadow: none;
     }
   }
 

@@ -490,6 +490,13 @@
     transition: none;
   }
 
+  .header.header--brand-gradient .menu-list__submenu :is(.menu-list__link, .menu-list__link-title) {
+    color: inherit;
+    fill: currentColor;
+    stroke: currentColor;
+    text-shadow: none;
+  }
+
   .header--brand-gradient .header-logo__image {
     filter: none;
     transition: filter 0.3s ease;
@@ -1024,6 +1031,14 @@
     /* Transition for hover only, color is driven by scroll */
     transition: opacity 0.2s ease, filter 0.2s ease;
     will-change: color;
+  }
+
+  #header-component .menu-list__submenu :is(.menu-list__link, .menu-list__link-title) {
+    color: inherit;
+    fill: currentColor;
+    stroke: currentColor;
+    text-shadow: none;
+    will-change: auto;
   }
 
   /* Specific icon handling to ensure they inherit color and use strokes */

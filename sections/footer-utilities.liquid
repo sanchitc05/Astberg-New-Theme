@@ -1,8 +1,13 @@
 
 
-<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+{%- liquid
+  assign gradient_hero = 'radial-gradient(ellipse at top right, rgba(74, 222, 128, 0.20) 0%, transparent 60%), radial-gradient(ellipse at bottom left, rgba(163, 230, 53, 0.30) 0%, transparent 60%), #ffffff'
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}" style="background: {{ gradient_hero }};"></div>
 <div
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+  style="background: {{ gradient_hero }};"
   {{ section.shopify_attributes }}
 >
   <div

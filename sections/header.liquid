@@ -158,6 +158,10 @@
   assign class = 'header'
   assign class = class | append: ' header--brand-gradient'
 
+  if transparent
+    assign class = class | append: ' header--transparent'
+  endif
+
   if transparent_color_scheme
     assign class = class | append: ' ' | append: transparent_color_scheme
   endif
@@ -497,14 +501,7 @@
     text-shadow: none;
   }
 
-  .header--brand-gradient .header-logo__image {
-    filter: none;
-    transition: filter 0.3s ease;
-  }
 
-  .header--brand-gradient.header--transparent .header-logo__image {
-    filter: brightness(0) invert(1);
-  }
 
   /* Reset fill for outline icons that should not be filled */
   .header--brand-gradient .account-button__icon,
@@ -1054,14 +1051,7 @@
     fill: inherit;
   }
 
-  .header .header-logo__image {
-    transition: filter 0.3s ease;
-  }
 
-  /* Logo filter toggle at the boundary */
-  .header.header--transparent .header-logo__image {
-    filter: brightness(0) invert(1);
-  }
 
   .header-actions__action {
     cursor: pointer;

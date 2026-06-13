@@ -1364,6 +1364,25 @@
       color: #ffffff;
     }
 
+    /* Sub-menu (Products, etc.) has white background — override text to dark */
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__menu-item,
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__menu-item--parent,
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__menu-item--child,
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__back-button,
+    #header-component .header__drawer .menu-drawer__submenu .drawer-localization__button {
+      color: #111827;
+    }
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__back-button .svg-wrapper,
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__back-button svg,
+    #header-component .header__drawer .menu-drawer__submenu .svg-wrapper,
+    #header-component .header__drawer .menu-drawer__submenu svg {
+      color: #111827;
+      fill: currentColor;
+    }
+    #header-component .header__drawer .menu-drawer__submenu .menu-drawer__back-button:hover {
+      color: #A3E635;
+    }
+
     #header-component .header__drawer .menu-drawer__menu-item,
     #header-component .header__drawer .menu-drawer__back-button {
       padding-block: var(--padding-sm);
